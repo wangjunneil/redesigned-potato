@@ -1,0 +1,27 @@
+.ant-timeline .ant-timeline-item {
+    padding-bottom: 50px;
+
+    .ant-timeline-item-label {
+        padding-right: 100px;
+        font-style: normal;    
+        color: #0007;
+        width: calc(40% - 12px);
+        text-align: left;
+    }
+    .ant-timeline-item-head {
+        inset-inline-start: 25%;
+    }
+
+    .ant-timeline-item-tail {
+        inset-inline-start: 25%;
+    }
+}
+
+.ant-timeline.ant-timeline-label .ant-timeline-item-left .ant-timeline-item-content {
+    inset-inline-start: calc(35% - 4px);
+    width: calc(65% - 12px);
+}
+
+.ant-timeline {
+    padding-top: 30px;
+}
