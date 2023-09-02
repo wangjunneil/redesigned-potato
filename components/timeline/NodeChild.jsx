@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react'
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from "react-images";
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm'
+
 
 const photos = [
   {
@@ -68,10 +71,10 @@ const NodeChild = (props) => {
     
     return (
         <>
-            <div>{nodeData.content}</div>
             <div>
-                <Gallery photos={photos} direction={"column"} onClick={openLightbox}/>                
+              <ReactMarkdown remarkPlugins={[gfm]}>{nodeData.content}</ReactMarkdown>              
             </div>
+            <Gallery photos={photos} direction={"row"} onClick={openLightbox} targetRowHeight={100}/>                
             <ModalGateway>
                 {viewerIsOpen ? (
                 <Modal onClose={closeLightbox}>
