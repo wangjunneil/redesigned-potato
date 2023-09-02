@@ -3,7 +3,6 @@ import { headers } from 'next/headers';
 import Image from 'next/image'
 import InfisicalClient from 'infisical-node';
 
-
 const get_ipdata = async (ip) => {
   const client = new InfisicalClient({
     token: process.env.KMS_TOKEN,
