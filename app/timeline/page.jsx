@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import { Timeline, Divider, FloatButton, Drawer, Space, Button, Form, Row, Col, Input, Upload } from 'antd';
 import './page.scss';
 import NodeLabel from '@/components/timeline/NodeLabel';
@@ -18,18 +18,7 @@ const TimeLinePage = () => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.metaKey && event.keyCode == 75) {
-        setOpen(true);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      // 销毁键盘事件
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    
   }, []);
 
   const onClose = () => {
@@ -41,23 +30,6 @@ const TimeLinePage = () => {
     form.validateFields().then(async (values) => {
       console.log('values', values);
     })
-  }
-
-  const customUpload = (file) => {
-    console.log('file', file);
-
-    // var accessKey = 'aG8mlc9B4VMZe_9T282O7q3CbLCDdZ6YdohuDa8p';
-    // var secretKey = '-7kLVkHoasqRjeR9zlT2e8KuRjJzKXEa-z2QtWsX';
-    // var mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
-
-    // var options = {
-    //   scope: 'wjfilm',
-    //   expires: 7200
-    // };
-    // var putPolicy = new qiniu.rs.PutPolicy(options);
-    // var uploadToken = putPolicy.uploadToken(mac);
-    // console.log('uploadToken', uploadToken);
-    // debugger
   }
 
   return (
@@ -74,6 +46,7 @@ const TimeLinePage = () => {
         />
 
       <FloatButton.BackTop />
+      <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />}/>
 
       <Drawer
         title="心情一刻"
@@ -95,7 +68,7 @@ const TimeLinePage = () => {
             <Col span={24}>
               <Form.Item
                 name="content"
-                // label="内容"
+                // label="文本内容"
                 rules={[
                   {
                     required: true,
@@ -103,25 +76,17 @@ const TimeLinePage = () => {
                   },
                 ]}
               >
-                <Input.TextArea bordered='true' showCount='true' rows={4} placeholder="请输入内容" />
+                <Input.TextArea bordered='true' rows={4} placeholder="请输入内容" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={24}>
               <Form.Item
-                  name="pictures"
-                  // label="图片"
+                  name="photos"
+                  // label="图片地址"
                 >
-              <Upload
-                // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                listType="picture"
-                // maxCount={3}
-                multiple
-                customRequest={customUpload}
-              >
-                <Button icon={<UploadOutlined />}>上传</Button>
-              </Upload>
+              
               </Form.Item>
             </Col>
           </Row>

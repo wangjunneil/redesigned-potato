@@ -9,9 +9,21 @@ const get_ipdata = async (ip) => {
     siteURL: 'https://kms.wangjun.dev',
     cacheTTL: 3600
   })
-  const IPIFY_API_KEY = await client.getSecret('IPIFY_API_KEY', {environment:'prod',path:'/',type:'shared'})
+  const IPIFY_API_KEY = await client.getSecret('IPIFY_API_KEY', 
+    {
+      environment:'prod',
+      path:'/',
+      type:'shared'
+    }
+  )
+  console.log(IPIFY_API_KEY.secretValue);
 
-  const res = await fetch(`https://geo.ipify.org/api/v2/country,city,vpn?apiKey=${IPIFY_API_KEY.secretValue}&ipAddress=${ip}`)
+  const res = await fetch(
+    `https://geo.ipify.org/api/v2/country,city?apiKey=${IPIFY_API_KEY.secretValue}&ipAddress=${ip}`, 
+    {
+      cache: 'force-cache'
+    }
+  )
   return res.json();
 }
 
@@ -25,22 +37,27 @@ const IPPage = async ({ params }) => {
   // 优先取参数ip，其次获取请求头中的ip
   const ip = slugs ? slugs[0] : x_real_ip ? x_real_ip : x_forward_for ? x_forward_for : ' Not Found';
 
-  const ip_data = await get_ipdata(ip);
-  console.log('ip_data', ip_data);
+  // {code: 403, messages: 'Access restricted. Check credits balance or enter the correct API key.'}
+  // https://geo.ipify.org/service/account-balance?apiKey=at_7cZromxgLsvsBaXToB3sYx1NRhqmJ
+  const ip_data = await get_ipdata(ip);  
+  console.log(ip_data);
 
-  return (
-    <div class="inline p-3">
-      <Image src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`} width={32} height={32}
-      alt="country" class="align-middle inline"/>
-      <div class="text-green-800 font-bold align-middle pl-1 inline">
-        {ip_data.ip}
-        <span class="inline text-gray-400 pl-1 text-xs">
-          {ip_data?.location.country},{ip_data?.location.region},{ip_data?.location.city}
-        </span>
-      </div>
-      <div class="text-xs text-gray-400 pl-3">{user_agent}</div>
-    </div>    
-  )
+  return ip_data.code ? 
+  <div class="inline p-3">
+    <span class='text-xs text-red-600'>{ip_data.messages}</span>
+  </div> 
+  :
+  <div class="inline p-3">
+    <Image src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`} width={32} height={32}
+    alt="country" class="align-middle inline"/>
+    <div class="text-green-800 font-bold align-middle pl-1 inline">
+      {ip_data.ip}
+      <span class="inline text-gray-400 pl-1 text-xs">
+        {ip_data?.location.country},{ip_data?.location.region},{ip_data?.location.city}
+      </span>
+    </div>
+    <div class="text-xs text-gray-400 pl-3">{user_agent}</div>
+  </div>    
 }
 
 export default IPPage
