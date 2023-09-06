@@ -16,7 +16,7 @@ const get_ipdata = async (ip) => {
       type:'shared'
     }
   )
-  console.log(IPIFY_API_KEY.secretValue);
+  console.info(IPIFY_API_KEY.secretValue);
 
   const res = await fetch(
     `https://geo.ipify.org/api/v2/country,city?apiKey=${IPIFY_API_KEY.secretValue}&ipAddress=${ip}`, 
@@ -39,8 +39,12 @@ const IPPage = async ({ params }) => {
 
   // {code: 403, messages: 'Access restricted. Check credits balance or enter the correct API key.'}
   // https://geo.ipify.org/service/account-balance?apiKey=at_7cZromxgLsvsBaXToB3sYx1NRhqmJ
-  const ip_data = await get_ipdata(ip);  
-  console.log(ip_data);
+  let ip_data = await get_ipdata(ip);  
+  console.info(ip_data);
+
+  if (ip === '::1') {
+    ip_data = { code: 100, messages: `invalid ip, ${ip}` }
+  }
 
   return ip_data.code ? 
   <div class="inline p-3">
