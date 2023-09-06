@@ -7,7 +7,12 @@ export function middleware(request) {
     // Cloudflare Authorization
     const cfAccessUserEmail = requestHeaders.get('Cf-Access-Authenticated-User-Email');
     const cfAccessJwt = requestHeaders.get('Cf-Access-Jwt-Assertion');
-    console.info('cfAccessUserEmail', cfAccessUserEmail, 'cfAccessJwt', cfAccessJwt);
+    console.info('cfAccessUserEmail', cfAccessUserEmail);
+    console.info('cfAccessJwt', cfAccessJwt);
+
+    const cfAuthorization = request.cookies.get('CF_Authorization');
+    console.info('cfAuthorization', cfAuthorization);
+    // https://developers.cloudflare.com/cloudflare-one/identity/authorization-cookie/validating-json/
 
     return response;
 }
