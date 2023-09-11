@@ -1,7 +1,7 @@
 import React from 'react'
 import { headers } from 'next/headers';
 import Image from 'next/image'
-import { getSecretValue } from '@/utils';
+import { getSecretValue } from '@/services';
 
 const get_ipdata = async (ip) => {
   const API_KEY = await getSecretValue('IPIFY_API_KEY');

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { UploadOutlined } from '@ant-design/icons';
-import { Drawer, Space, Button, Form, Row, Col, Input, Upload } from 'antd';
+import { Drawer, Space, Button, Form, Row, Col, Input, Upload, Spin } from 'antd';
 import { currentDate } from '../../utils';
+import { createTimeLine } from '@/database/modules/TimeLineDataAction';
 
 const NewTimeLine = (props) => {
     const { open, setOpen } = props;
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false)
     const [uploadToken, setUploadToken] = useState();
     const [fileKey, setFileKey] = useState();
     const [uploadFileList, setUploadFileList] = useState([])
@@ -16,24 +18,26 @@ const NewTimeLine = (props) => {
           const result = await response.json();
           if (result.status === 'ok') {
             setUploadToken(result.token);        
-          }    
+          }          
         })();    
     }, []);
 
     const onClose = () => {
         form.resetFields();
         setOpen(false);
+        setLoading(false);
         setFileKey();
-        setUploadFileList([]);        
+        setUploadFileList([]);
     };
 
     const handleSubmit = () => {
-        form.validateFields().then(async (values) => {
-          console.log('values', values);
-    
-          // const res = createTimeLine(values)
-          // console.log('createTimeLine', res);
-        })
+      setLoading(true);
+      form.validateFields().then(async (values) => {
+        const res = await createTimeLine(values)
+        console.log('createTimeLine', res);
+
+        onClose();
+      })
     }
 
     const getUploadToken = () => {
@@ -70,7 +74,7 @@ const NewTimeLine = (props) => {
         return e && e.fileList;
     };
 
-    return (
+    return (      
     <Drawer title="心情一刻" placement={'bottom'} closable={false} onClose={onClose} open={open}
         extra={
           <Space>
@@ -81,6 +85,7 @@ const NewTimeLine = (props) => {
           </Space>
         }
         >
+          <Spin tip="保存中" size="large" spinning={loading}>
         <Form layout="vertical" form={form}>
           <Row gutter={16}>
             <Col span={24}>
@@ -120,6 +125,7 @@ const NewTimeLine = (props) => {
             </Col>
           </Row>
         </Form>
+        </Spin>
     </Drawer>
   )
 }
