@@ -16,7 +16,7 @@ export function middleware(request) {
     // 在登录态有效期内直接访问，都会在 Cookie 中带上 CF_Authorization 值
     // 此值就是上面的 cfAccessJwt，即 cfAuthorization == cfAccessJwt
     const cfAuthorization = request.cookies.get('CF_Authorization');
-    console.info('cfAuthorization', cfAuthorization);
+    // console.info('cfAuthorization', cfAuthorization);
 
     
     // https://developers.cloudflare.com/cloudflare-one/identity/authorization-cookie/validating-json/
