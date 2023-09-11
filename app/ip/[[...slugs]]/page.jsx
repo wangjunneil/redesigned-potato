@@ -1,25 +1,14 @@
 import React from 'react'
 import { headers } from 'next/headers';
 import Image from 'next/image'
-import InfisicalClient from 'infisical-node';
+import { getSecretValue } from '@/utils';
 
 const get_ipdata = async (ip) => {
-  const client = new InfisicalClient({
-    token: process.env.KMS_TOKEN,
-    siteURL: 'https://kms.wangjun.dev',
-    cacheTTL: 3600
-  })
-  const IPIFY_API_KEY = await client.getSecret('IPIFY_API_KEY', 
-    {
-      environment:'prod',
-      path:'/',
-      type:'shared'
-    }
-  )
-  console.info(IPIFY_API_KEY.secretValue);
+  const API_KEY = await getSecretValue('IPIFY_API_KEY');
+  console.info('IPIFY_API_KEY', API_KEY);
 
   const res = await fetch(
-    `https://geo.ipify.org/api/v2/country,city?apiKey=${IPIFY_API_KEY.secretValue}&ipAddress=${ip}`, 
+    `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${ip}`, 
     {
       cache: 'force-cache'
     }
@@ -47,39 +36,21 @@ const IPPage = async ({ params }) => {
   }
 
   return ip_data.code ? 
-  <div class="inline p-3">
-    <span class='text-xs text-red-600'>{ip_data.messages}</span>
+  <div className="inline p-3">
+    <span className='text-xs text-red-600'>{ip_data.messages}</span>
   </div> 
   :
-  <div class="inline p-3">
+  <div className="inline p-3">
     <Image src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`} width={32} height={32}
-    alt="country" class="align-middle inline"/>
-    <div class="text-green-800 font-bold align-middle pl-1 inline">
+    alt="country" className="align-middle inline"/>
+    <div className="text-green-800 font-bold align-middle pl-1 inline">
       {ip_data.ip}
-      <span class="inline text-gray-400 pl-1 text-xs">
+      <span className="inline text-gray-400 pl-1 text-xs">
         {ip_data?.location.country},{ip_data?.location.region},{ip_data?.location.city}
       </span>
     </div>
-    <div class="text-xs text-gray-400 pl-3">{user_agent}</div>
+    <div className="text-xs text-gray-400 pl-3">{user_agent}</div>
   </div>    
 }
 
 export default IPPage
-
-
-{/* <body style="font-family:sans-serif;font-size: 12px;color: darkgray;padding: 5px;">    
-        <div>
-            <img src="https://ipdata.co/flags/{{ip_data['location']['country'].lower()}}.png" style="vertical-align: middle;border: 1px solid #000;"/>
-            <span style="font-size: 16px;font-weight: bold;color: #014901;vertical-align: middle;">
-                {{ip_data['ip']}}
-            </span>
-            <div style="display: inline-block;vertical-align: bottom;">
-                {{ip_data['location']['country']}}
-                ,{{ip_data['location']['region']}}
-                ,{{ip_data['location']['city']}}
-            </div>        
-        </div>
-        <div style="padding-top: 3px;">
-            {{request.headers['user-agent']}}
-        </div>
-    </body>  */}
