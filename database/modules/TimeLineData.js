@@ -1,6 +1,6 @@
 import { Schema, model, models } from "mongoose";
 
-const timeLineSchema = new Schema({
+const timeLineDataSchema = new Schema({
     createtime: {
         type: Date,
         default: Date.now,
@@ -29,5 +29,5 @@ const timeLineSchema = new Schema({
     }
 }, { timestamps: true });
 
-const TimeLine = model('timeLine', timeLineSchema);
-export default TimeLine
+const TimeLineData = models.timeLineData || model('timeLineData', timeLineDataSchema);
+export default TimeLineData

@@ -1,11 +1,13 @@
+"use server";
+
 import connectMongo from '@/database/mongodb'
-import TimeLine from './TimeLine'
+import TimeLineData from './TimeLineData'
 
 connectMongo()
 
 export async function createTimeLine(data) {
     try {
-        const newTimeLine = TimeLine(data);
+        const newTimeLine = TimeLineData(data);
 
         await newTimeLine.save();
 
