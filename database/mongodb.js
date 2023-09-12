@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
-import { getSecretValue } from '@/services';
+import { getSecretValue } from "@/services";
 
 async function connectMongo() {
-    const MONGODB_URL = await getSecretValue('MONGODB_URL');
-    console.info('MONGODB_URL', MONGODB_URL);
+  const MONGODB_URL = await getSecretValue("MONGODB_URL");
 
-    mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  mongoose
+    .connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-        console.info('MongoDB connected')
-    }).catch(error => {
-        console.errore(error);
+      console.info("MongoDB connected");
     })
+    .catch((error) => {
+      console.errore(error);
+    });
 }
 
 export default connectMongo;

@@ -1,50 +1,51 @@
 .ant-timeline .ant-timeline-item {
-    padding-bottom: 50px;
+  padding-bottom: 50px;
 
-    .ant-timeline-item-label {
-        padding-right: 100px;
-        font-style: normal;    
-        color: #0007;
-        width: calc(40% - 12px);
-        text-align: left;
-    }
-    .ant-timeline-item-head {
-        inset-inline-start: 25%;
-    }
+  .ant-timeline-item-label {
+    padding-right: 100px;
+    font-style: normal;
+    font-weight: bold;
+    color: #000;
+    width: calc(40% - 12px);
+    text-align: left;
+  }
+  .ant-timeline-item-head {
+    inset-inline-start: 30%;
+  }
 
-    .ant-timeline-item-tail {
-        inset-inline-start: 25%;
-    }
+  .ant-timeline-item-tail {
+    inset-inline-start: 30%;
+  }
 }
 
-.ant-timeline.ant-timeline-label .ant-timeline-item-left .ant-timeline-item-content {
-    inset-inline-start: calc(35% - 4px);
-    width: calc(65% - 12px);
-
-    // img {
-    //     max-width: 50px;
-    //     display: inline;
-    //     border: 1px solid #000;
-    //     margin: 0px 5px;
-    //     cursor: pointer;
-    // }
+.ant-timeline.ant-timeline-label
+  .ant-timeline-item-left
+  .ant-timeline-item-content {
+  inset-inline-start: calc(35% - 4px);
+  width: calc(65% - 12px);
 }
 
 .ant-timeline {
-    padding-top: 30px;
+  padding-top: 30px;
 }
 
 .react-photo-gallery--gallery {
-    img {
-        width: 20px;
-    }
+  img {
+    width: 20px;
+  }
+}
+
+.ant-modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .react-images__view-image--isModal {
-display: inline-block;
-left: 50%
+  display: inline-block;
+  left: 50%;
 }
 
 a {
-    color: #1677ff;
+  color: #1677ff;
 }

@@ -1,13 +1,13 @@
-import React from 'react'
+import React from "react";
 
 const NodeLabel = (props) => {
-    const { nodeData } = props
-    return (
-        <div>
-            {nodeData.date} 
-            <span style={{paddingLeft: '5px', color: 'gray', fontSize: '10px'}}>{nodeData.week}</span>
-        </div>
-    )
-}
+  const { timeLine } = props;
+  return (
+    <div>
+      {timeLine.year}/{timeLine.month}/{timeLine.day}
+      <div style={{ color: "gray", fontSize: "8px" }}>{timeLine.week}</div>
+    </div>
+  );
+};
 
-export default NodeLabel
+export default NodeLabel;

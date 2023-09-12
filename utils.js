@@ -6,3 +6,9 @@ export const currentDate = () => {
 
     return `${year}${month}${day}`;
 }
+
+export const splitDate = () => {
+    const now = currentDate();
+    return now.match(/(\d{4})(\d{2})(\d{2})/).slice(1);
+}
+

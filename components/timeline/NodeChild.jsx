@@ -1,96 +1,76 @@
-import React, { useState, useCallback } from 'react'
-import Gallery from 'react-photo-gallery';
+import React, { useState, useCallback } from "react";
+import Gallery from "react-photo-gallery";
 import Carousel, { Modal, ModalGateway } from "react-images";
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm'
-
-
-const photos = [
-  {
-    src: "https://source.unsplash.com/2ShvY8Lf6l0/800x599",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/Dm-qxdynoEc/800x799",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/qDkso9nvCg0/600x799",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/iecJiKe_RNg/600x799",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/epcsn8Ed8kY/600x799",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/NQSWvyVRIJk/800x599",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/zh7GEuORbUw/600x799",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/PpOHJezOalU/800x599",
-    width: 1,
-    height: 1
-  },
-  {
-    src: "https://source.unsplash.com/I1ASdgphUH4/800x599",
-    width: 1,
-    height: 1
-  }
-];
+import ReactMarkdown from "react-markdown";
+import { DeleteOutlined } from "@ant-design/icons";
+import { Row, Col, Button } from "antd";
+import gfm from "remark-gfm";
+import { deleteTimeLine } from "@/database/modules/TimeLineDataAction";
 
 const NodeChild = (props) => {
-    const { nodeData } = props;
+  const { timeLine, isDelete, setIsDelete, setLoading } = props;
+  const [currentImage, setCurrentImage] = useState(0);
+  const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
-    const [currentImage, setCurrentImage] = useState(0);
-    const [viewerIsOpen, setViewerIsOpen] = useState(false);
+  const openLightbox = useCallback((event, { photo, index }) => {
+    setCurrentImage(index);
+    setViewerIsOpen(true);
+  }, []);
 
-    const openLightbox = useCallback((event, { photo, index }) => {
-        setCurrentImage(index);
-        setViewerIsOpen(true);
-    }, []);
+  const closeLightbox = () => {
+    setCurrentImage(0);
+    setViewerIsOpen(false);
+  };
 
-    const closeLightbox = () => {
-        setCurrentImage(0);
-        setViewerIsOpen(false);
-    };
-    
-    return (
-        <>
-            <div>
-              <ReactMarkdown remarkPlugins={[gfm]}>{nodeData.content}</ReactMarkdown>              
-            </div>
-            <Gallery photos={photos} direction={"row"} onClick={openLightbox} targetRowHeight={100}/>                
-            <ModalGateway>
-                {viewerIsOpen ? (
-                <Modal onClose={closeLightbox}>
-                    <Carousel
-                    currentIndex={currentImage}
-                    views={photos.map(x => ({
-                        ...x,
-                        srcset: x.srcSet,
-                        caption: x.title
-                    }))}
-                    />
-                </Modal>
-                ) : null}
-            </ModalGateway>
-        </>
-    )
-}
+  const removeTimeLine = async (id) => {
+    setLoading(true);
+    await deleteTimeLine({ _id: id });
+    setIsDelete(false);
+  };
 
-export default NodeChild
+  return (
+    <>
+      <Row gutter={16}>
+        <Col span={isDelete ? 20 : 24}>
+          <ReactMarkdown remarkPlugins={[gfm]}>
+            {timeLine.content}
+          </ReactMarkdown>
+        </Col>
+        {isDelete ? (
+          <Col span={4}>
+            <Button
+              shape="circle"
+              size="small"
+              icon={<DeleteOutlined />}
+              onClick={() => removeTimeLine(timeLine._id)}
+            />
+          </Col>
+        ) : (
+          <></>
+        )}
+      </Row>
+      <Gallery
+        photos={timeLine.photos}
+        direction={"row"}
+        onClick={openLightbox}
+        targetRowHeight={100}
+      />
+      <ModalGateway>
+        {viewerIsOpen ? (
+          <Modal onClose={closeLightbox}>
+            <Carousel
+              currentIndex={currentImage}
+              views={timeLine.photos.map((x) => ({
+                ...x,
+                srcset: x.srcSet,
+                caption: x.title,
+              }))}
+            />
+          </Modal>
+        ) : null}
+      </ModalGateway>
+    </>
+  );
+};
+
+export default NodeChild;
