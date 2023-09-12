@@ -2,20 +2,20 @@
 const nextConfig = {
   experimental: {
     serverActions: true,
-    serverComponentsExternalPackages: ['mongoose']
+    serverComponentsExternalPackages: ["mongoose"],
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'ipdata.co',
+        protocol: "https",
+        hostname: "ipdata.co",
       },
       {
-        protocol: 'https',
-        hostname: 'kms.wangjun.dev',
+        protocol: "https",
+        hostname: "restapi.amap.com",
       },
     ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

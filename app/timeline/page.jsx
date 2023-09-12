@@ -1,42 +1,112 @@
-'use client'
-import React, { useState, useEffect, useCallback } from 'react';
-import { UploadOutlined, PlusOutlined } from '@ant-design/icons';
-import { Timeline, Divider, FloatButton, Drawer, Space, Button, Form, Row, Col, Input, Upload } from 'antd';
-import './page.scss';
-import NodeLabel from '@/components/timeline/NodeLabel';
-import NodeChild from '@/components/timeline/NodeChild';
-import NewTimeLine from './NewTimeLine';
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+  PlusOutlined,
+  CalendarOutlined,
+  CalendarFilled,
+  DeleteOutlined,
+  DeleteFilled,
+} from "@ant-design/icons";
+import { Timeline, Divider, FloatButton, Select, Spin, Modal } from "antd";
+import "./page.scss";
+import NodeLabel from "@/components/timeline/NodeLabel";
+import NodeChild from "@/components/timeline/NodeChild";
+import NewTimeLine from "../../components/timeline/NewTimeLine";
+import {
+  enumTimeLineYear,
+  queryTimeLineAll,
+} from "@/database/modules/TimeLineDataAction";
+import { splitDate } from "@/utils";
 
-const timeLineData = [
-    {date: '2015/09/01', week: 'Wed.', content: '下拉😠选择器通常包含选择器及下拉框，下拉框展示选项列表，提供单选或者多选的能力。选定的选项可以作为表单中的字段值。'},
-    {date: '2015/09/05', week: 'Tues.', content: '下拉选择器用于🏓表单或页面区域的信息筛查选择，同时用于替代系统原生 select，在限定的可选项内进行快速选择，核心能力是选择。'},
-    {date: '2015/09/07', week: 'Sat.', content: '标签上的文字应该简洁、无歧义并能准确描述出它所对应的内容区的信息特征。'},
-    {date: '2015/09/21', week: 'Mon.', content: "# Hello, **React**! [百度](https://www.baidu.com) <mark>这还是高亮文本</mark> ==tag== https://www.jaskan.com, ~~删除线~~ O<sup>2</sup>"},
-];
+const [year, month, day] = splitDate();
 
 const TimeLinePage = () => {
   const [open, setOpen] = useState(false);
+  const [showModel, setShowModel] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
+  const [timeLineData, setTimeLineData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [years, setYears] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await queryTimeLineAll({ status: "ENABLED", year: year });
+      setLoading(false);
+      setTimeLineData(res);
+
+      const years = await enumTimeLineYear();
+      setYears(years);
+    })();
+  }, [open, isDelete]);
+
+  const handleChange = (value) => {
+    setShowModel(false);
+    setLoading(true);
+    queryTimeLineAll({ status: "ENABLED", year: value }).then((res) => {
+      setLoading(false);
+      setTimeLineData(res);
+    });
+  };
 
   return (
-    <div className="w-3/5 my-24 mx-auto">
-        <h1 className="text-center font-500 text-2xl">
-            Life Time Line            
-            <span className="text-xs pl-3 text-zinc-400">2023.09.01 develop</span>
-        </h1>
-        <Divider orientation="left" plain></Divider>
-        <Timeline mode='left'
-        items={timeLineData.map(item => {
-            return {label: <NodeLabel nodeData={item}/>, color: 'gray', children: <NodeChild nodeData={item}/>}
-        })}
+    <div className="my-16 mx-auto w-5/6">
+      <h1 className="text-center font-500 text-2xl">
+        Life Time Line
+        <span className="text-xs text-zinc-400 pl-2">Since 2023.09.01</span>
+      </h1>
+      <Divider orientation="left" plain></Divider>
+      <Spin tip="加载中" size="large" spinning={loading}>
+        <Timeline
+          mode="left"
+          items={timeLineData.map((item) => {
+            return {
+              label: <NodeLabel timeLine={item} />,
+              color: "gray",
+              children: (
+                <NodeChild
+                  timeLine={item}
+                  isDelete={isDelete}
+                  setIsDelete={setIsDelete}
+                  setLoading={setLoading}
+                />
+              ),
+            };
+          })}
         />
+      </Spin>
 
-      <FloatButton.BackTop />
-      <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />}/>
+      <FloatButton.Group shape="square">
+        <FloatButton
+          icon={showModel ? <CalendarFilled /> : <CalendarOutlined />}
+          onClick={() => setShowModel(true)}
+        />
+        <FloatButton
+          onClick={() => setIsDelete(!isDelete)}
+          icon={isDelete ? <DeleteFilled /> : <DeleteOutlined />}
+        />
+        <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />} />
+        <FloatButton.BackTop />
+      </FloatButton.Group>
 
-        <NewTimeLine open={open} setOpen={setOpen} />
+      <Modal
+        title={null}
+        open={showModel}
+        centered={true}
+        footer={null}
+        closeIcon={null}
+        maskClosable={false}
+      >
+        <Select
+          defaultValue={year}
+          className="px-2 w-36 text-center"
+          options={years}
+          onChange={handleChange}
+        />
+      </Modal>
 
+      <NewTimeLine open={open} setOpen={setOpen} />
     </div>
-  )
-}
+  );
+};
 
-export default TimeLinePage
+export default TimeLinePage;
