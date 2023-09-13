@@ -3,18 +3,34 @@ import Gallery from "react-photo-gallery";
 import Carousel, { Modal, ModalGateway } from "react-images";
 import ReactMarkdown from "react-markdown";
 import { DeleteOutlined } from "@ant-design/icons";
-import { Row, Col, Button } from "antd";
+import { Row, Col, Button, Modal as AntModal } from "antd";
 import gfm from "remark-gfm";
 import { deleteTimeLine } from "@/database/modules/TimeLineDataAction";
+import Image from "next/image";
 
 const NodeChild = (props) => {
   const { timeLine, isDelete, setIsDelete, setLoading } = props;
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
+  const [video, setVideo] = useState();
+  const [videoModal, setVideoModal] = useState(false);
+
+  const [longLat, setLongLat] = useState();
+  const [showMapModal, setShowMapModal] = useState(false);
+
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
   const openLightbox = useCallback((event, { photo, index }) => {
-    setCurrentImage(index);
-    setViewerIsOpen(true);
+    if (photo.src === "/play.png") {
+      const videoUrl = timeLine.photos[index].src;
+      setVideo(videoUrl);
+      setVideoModal(true);
+    } else {
+      setCurrentImage(index);
+      setViewerIsOpen(true);
+    }
   }, []);
 
   const closeLightbox = () => {
@@ -26,6 +42,12 @@ const NodeChild = (props) => {
     setLoading(true);
     await deleteTimeLine({ _id: id });
     setIsDelete(false);
+  };
+
+  const videModalClose = () => {
+    setVideo(null);
+    setVideoModal(false);
+    console.log("videModalClose", video, videoModal);
   };
 
   return (
@@ -49,26 +71,73 @@ const NodeChild = (props) => {
           <></>
         )}
       </Row>
+
       <Gallery
-        photos={timeLine.photos}
+        photos={
+          isIOS
+            ? timeLine.photos
+            : timeLine.photos.map((item) => {
+                return item.src.endsWith("mp4")
+                  ? { src: "/play.png", width: 20, height: 30 }
+                  : item;
+              })
+        }
         direction={"row"}
         onClick={openLightbox}
         targetRowHeight={100}
       />
+
+      {/* 地理位置信息 */}
+      {timeLine.extends ? (
+        <div className="mt-1">
+          <a style={{ fontSize: "12px" }}>
+            <Image
+              src={"/loc2.png"}
+              width={16}
+              height={16}
+              style={{ display: "inline" }}
+              alt="location"
+            />
+            <span className="pl-1">
+              {timeLine.extends.geo.formatted_address}(附近)
+            </span>
+          </a>
+        </div>
+      ) : (
+        <></>
+      )}
+
+      {/* 图片轮播 Modal */}
       <ModalGateway>
         {viewerIsOpen ? (
           <Modal onClose={closeLightbox}>
             <Carousel
               currentIndex={currentImage}
-              views={timeLine.photos.map((x) => ({
-                ...x,
-                srcset: x.srcSet,
-                caption: x.title,
-              }))}
+              views={timeLine.photos
+                .filter((x) => !x.src.endsWith(".mp4"))
+                .map((x) => ({
+                  ...x,
+                  srcset: x.srcSet,
+                  caption: x.title,
+                }))}
             />
           </Modal>
         ) : null}
       </ModalGateway>
+
+      {/* 视频播放 Modal */}
+      <AntModal
+        title="PLAY"
+        open={videoModal}
+        centered={true}
+        afterClose={videModalClose}
+        onOk={videModalClose}
+        onCancel={videModalClose}
+      >
+        <video controls>
+          <source src={video} type="video/mp4" />
+        </video>
+      </AntModal>
     </>
   );
 };

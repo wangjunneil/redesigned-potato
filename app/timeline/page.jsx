@@ -33,6 +33,7 @@ const TimeLinePage = () => {
       const res = await queryTimeLineAll({ status: "ENABLED", year: year });
       setLoading(false);
       setTimeLineData(res);
+      console.log("timeLineData", res);
 
       const years = await enumTimeLineYear();
       setYears(years);
@@ -46,6 +47,10 @@ const TimeLinePage = () => {
       setLoading(false);
       setTimeLineData(res);
     });
+  };
+
+  const yearModalClose = () => {
+    setShowModel(false);
   };
 
   return (
@@ -89,12 +94,11 @@ const TimeLinePage = () => {
       </FloatButton.Group>
 
       <Modal
-        title={null}
+        title="选择日期"
         open={showModel}
         centered={true}
-        footer={null}
-        closeIcon={null}
-        maskClosable={false}
+        onOk={yearModalClose}
+        onCancel={yearModalClose}
       >
         <Select
           defaultValue={year}

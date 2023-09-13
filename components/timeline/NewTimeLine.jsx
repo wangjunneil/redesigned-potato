@@ -176,7 +176,6 @@ const NewTimeLine = (props) => {
       closable={false}
       onClose={onClose}
       open={open}
-      size="large"
       extra={
         <Space>
           <Button onClick={onClose}>取消</Button>
