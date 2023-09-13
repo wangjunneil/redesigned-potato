@@ -10,7 +10,7 @@ async function connectMongo() {
       console.info("MongoDB connected");
     })
     .catch((error) => {
-      console.errore(error);
+      console.error(error);
     });
 }
 
