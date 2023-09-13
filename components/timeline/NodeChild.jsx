@@ -16,9 +16,6 @@ const NodeChild = (props) => {
   const [video, setVideo] = useState();
   const [videoModal, setVideoModal] = useState(false);
 
-  const [longLat, setLongLat] = useState();
-  const [showMapModal, setShowMapModal] = useState(false);
-
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -90,7 +87,12 @@ const NodeChild = (props) => {
       {/* 地理位置信息 */}
       {timeLine.extends ? (
         <div className="mt-1">
-          <a style={{ fontSize: "12px" }}>
+          <a
+            style={{ fontSize: "12px" }}
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`}
+          >
             <Image
               src={"/loc2.png"}
               width={16}
@@ -99,7 +101,9 @@ const NodeChild = (props) => {
               alt="location"
             />
             <span className="pl-1">
-              {timeLine.extends.geo.formatted_address}(附近)
+              {timeLine.extends.geo.city}
+              {timeLine.extends.geo.district}
+              {timeLine.extends.geo.street}(附近)
             </span>
           </a>
         </div>

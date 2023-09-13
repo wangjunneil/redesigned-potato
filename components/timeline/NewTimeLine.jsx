@@ -47,7 +47,7 @@ const NewTimeLine = (props) => {
           const latitude = position.coords.latitude;
 
           (async () => {
-            const AMAP_KEY = "3e33b6ce0066e396d97bca3cb96a6693"; //await getSecretValue("AMAP_KEY");
+            const AMAP_KEY = "3e33b6ce0066e396d97bca3cb96a6693"; // await getSecretValue("AMAP_KEY");
 
             // 查询地理位置信息
             const response = await fetch(

@@ -54,7 +54,7 @@ const TimeLinePage = () => {
   };
 
   return (
-    <div className="my-16 mx-auto w-5/6">
+    <div className="my-8 mx-auto w-5/6">
       <h1 className="text-center font-500 text-2xl">
         Life Time Line
         <span className="text-xs text-zinc-400 pl-2">Since 2023.09.01</span>
