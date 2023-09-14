@@ -80,11 +80,12 @@ const NewTimeLine = (props) => {
     (async () => {
       const response = await fetch("/qiniu", { cache: "no-cache" });
       const result = await response.json();
+      console.info("uploadToken", result);
       if (result.status === "ok") {
         setUploadToken(result.token);
       }
     })();
-  }, []);
+  }, [open]);
 
   const onClose = () => {
     form.resetFields();
