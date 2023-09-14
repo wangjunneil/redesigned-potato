@@ -44,7 +44,6 @@ const NodeChild = (props) => {
   const videModalClose = () => {
     setVideo(null);
     setVideoModal(false);
-    console.log("videModalClose", video, videoModal);
   };
 
   return (
@@ -88,7 +87,7 @@ const NodeChild = (props) => {
       {timeLine.extends ? (
         <div className="mt-1">
           <a
-            style={{ fontSize: "12px" }}
+            style={{ fontSize: "12px", color: "gray" }}
             target="_blank"
             rel="noopener noreferrer"
             href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`}

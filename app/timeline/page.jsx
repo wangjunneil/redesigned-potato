@@ -7,7 +7,15 @@ import {
   DeleteOutlined,
   DeleteFilled,
 } from "@ant-design/icons";
-import { Timeline, Divider, FloatButton, Select, Spin, Modal } from "antd";
+import {
+  Timeline,
+  Divider,
+  FloatButton,
+  Select,
+  Spin,
+  Modal,
+  Skeleton,
+} from "antd";
 import "./page.scss";
 import NodeLabel from "@/components/timeline/NodeLabel";
 import NodeChild from "@/components/timeline/NodeChild";
@@ -17,6 +25,7 @@ import {
   queryTimeLineAll,
 } from "@/database/modules/TimeLineDataAction";
 import { splitDate } from "@/utils";
+import { getSecretValue } from "@/services";
 
 const [year, month, day] = splitDate();
 
@@ -55,12 +64,12 @@ const TimeLinePage = () => {
 
   return (
     <div className="my-8 mx-auto w-5/6">
-      <h1 className="text-center font-500 text-2xl">
+      <h1 className="text-2xl text-center font-600">
         Life Time Line
         <span className="text-xs text-zinc-400 pl-2">Since 2023.09.01</span>
       </h1>
       <Divider orientation="left" plain></Divider>
-      <Spin tip="加载中" size="large" spinning={loading}>
+      <Skeleton active={true} loading={loading}>
         <Timeline
           mode="left"
           items={timeLineData.map((item) => {
@@ -78,20 +87,20 @@ const TimeLinePage = () => {
             };
           })}
         />
-      </Spin>
 
-      <FloatButton.Group shape="square">
-        <FloatButton
-          icon={showModel ? <CalendarFilled /> : <CalendarOutlined />}
-          onClick={() => setShowModel(true)}
-        />
-        <FloatButton
-          onClick={() => setIsDelete(!isDelete)}
-          icon={isDelete ? <DeleteFilled /> : <DeleteOutlined />}
-        />
-        <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />} />
-        <FloatButton.BackTop />
-      </FloatButton.Group>
+        <FloatButton.Group shape="square">
+          <FloatButton
+            icon={showModel ? <CalendarFilled /> : <CalendarOutlined />}
+            onClick={() => setShowModel(true)}
+          />
+          <FloatButton
+            onClick={() => setIsDelete(!isDelete)}
+            icon={isDelete ? <DeleteFilled /> : <DeleteOutlined />}
+          />
+          <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />} />
+          <FloatButton.BackTop />
+        </FloatButton.Group>
+      </Skeleton>
 
       <Modal
         title="选择日期"
