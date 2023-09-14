@@ -66,4 +66,9 @@ const IPPage = async ({ params }) => {
   );
 };
 
+export const metadata = {
+  title: "IP Infomation",
+  description: "IP位置信息查询",
+};
+
 export default IPPage;
