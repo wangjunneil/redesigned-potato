@@ -13,7 +13,6 @@ import {
 } from "antd";
 import { currentDate, splitDate } from "../../utils";
 import { createTimeLine } from "@/database/modules/TimeLineDataAction";
-import { getSecretValue } from "@/services";
 
 const [year, month, day] = splitDate();
 const weekDays = [
@@ -32,12 +31,11 @@ const NewTimeLine = (props) => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false);
+  const [tips, setTips] = useState("");
   const [uploadToken, setUploadToken] = useState();
   const [fileKey, setFileKey] = useState();
   const [uploadFileList, setUploadFileList] = useState([]);
-
   const [geo, setGeo] = useState({});
-  const [weather, setWeather] = useState({});
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -47,11 +45,9 @@ const NewTimeLine = (props) => {
           const latitude = position.coords.latitude;
 
           (async () => {
-            const AMAP_KEY = "3e33b6ce0066e396d97bca3cb96a6693"; // await getSecretValue("AMAP_KEY");
-
             // 查询地理位置信息
             const response = await fetch(
-              `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=${AMAP_KEY}`,
+              `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`,
               { cache: "force-cache" }
             );
             const res = await response.json();
@@ -92,19 +88,20 @@ const NewTimeLine = (props) => {
     setOpen(false);
     setLoading(false);
     setFileKey();
+    setTips(null);
     setUploadFileList([]);
   };
 
   const handleSubmit = () => {
+    setTips("保存中");
     setLoading(true);
     form.validateFields().then(async (values) => {
       console.log("geo", geo);
 
       if (geo?.adcode) {
-        const AMAP_KEY = "3e33b6ce0066e396d97bca3cb96a6693";
         // 查询位置天气信息
         const weatherResponse = await fetch(
-          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=${AMAP_KEY}`,
+          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a6693`,
           { cache: "force-cache" }
         );
         console.log("weatherResponse", weatherResponse);
@@ -132,6 +129,8 @@ const NewTimeLine = (props) => {
 
           onClose();
         }
+      } else {
+        setLoading(false);
       }
     });
   };
@@ -148,6 +147,21 @@ const NewTimeLine = (props) => {
     return true;
   };
 
+  const deleteUploadFile = (file) => {
+    setTips("删除中");
+    setLoading(true);
+
+    const key = file.response.key;
+    fetch("/qiniu", {
+      method: "POST",
+      cache: "no-cache",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key }),
+    }).then((res) => {
+      setLoading(false);
+    });
+  };
+
   const handleUploadChange = (info) => {
     if (info.file.status === "error") {
       console.log(info.file.response?.error);
@@ -158,7 +172,6 @@ const NewTimeLine = (props) => {
       console.log("imageKey", imageKey);
 
       setUploadFileList(info.fileList);
-
       console.log("fileList", info.fileList);
     }
   };
@@ -191,7 +204,7 @@ const NewTimeLine = (props) => {
         </Space>
       }
     >
-      <Spin tip="保存中" size="large" spinning={loading}>
+      <Spin tip={tips} size="large" spinning={loading}>
         <Form layout="vertical" form={form}>
           <Row gutter={16}>
             <Col span={24}>
@@ -221,14 +234,15 @@ const NewTimeLine = (props) => {
               >
                 <Upload
                   name="file"
-                  multiple={true}
-                  // accept=".png, .jpg, .jpeg"
+                  multiple={false}
+                  accept=".png, .jpg, .jpeg, .mp4"
                   data={() => getUploadToken()}
                   beforeUpload={beforeUpload}
                   onChange={handleUploadChange}
                   action="https://up-z0.qiniup.com"
                   listType="picture"
                   fileList={uploadFileList}
+                  onRemove={deleteUploadFile}
                 >
                   <Button icon={<UploadOutlined />}>上传</Button>
                 </Upload>
