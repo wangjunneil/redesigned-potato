@@ -46,7 +46,7 @@ const IPPage = async ({ params }) => {
       <span className="text-xs text-red-600">{ip_data.messages}</span>
     </div>
   ) : (
-    <div className="inline p-3">
+    <div style={{ padding: "10px" }}>
       <Image
         src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`}
         width={32}
@@ -61,7 +61,7 @@ const IPPage = async ({ params }) => {
           {ip_data?.location.city}
         </span>
       </div>
-      <div className="text-xs text-gray-400 pl-3">{user_agent}</div>
+      <div className="text-xs text-gray-400 pt-1">{user_agent}</div>
     </div>
   );
 };
