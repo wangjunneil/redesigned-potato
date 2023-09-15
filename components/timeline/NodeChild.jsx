@@ -73,7 +73,7 @@ const NodeChild = (props) => {
           isIOS
             ? timeLine.photos
             : timeLine.photos.map((item) => {
-                return item.src.endsWith("mp4")
+                return item.src.endsWith("mp4") || item.src.endsWith("mov")
                   ? { src: "/play.png", width: 20, height: 30 }
                   : item;
               })
@@ -93,7 +93,7 @@ const NodeChild = (props) => {
             href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`}
           >
             <Image
-              src={"/loc2.png"}
+              src={"/location.png"}
               width={16}
               height={16}
               style={{ display: "inline" }}
