@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findOne } from "./database/modules/TimeLineUserAction";
+// import { findOne } from "./database/user/TimeLineUserAction";
 
 export async function middleware(request) {
   const response = NextResponse.next();
@@ -14,7 +14,7 @@ export async function middleware(request) {
   if (cfAccessUserEmail && cfAccessJwt) {
     // 查询 email 是否存在，存在则更新 jwt，不存在则新增
     // const user = await findOne({ email: "wangjunneil@gmail.com" });
-    // console.log(user);
+    // console.log("user", user);
   }
 
   // 在登录态有效期内直接访问，都会在 Cookie 中带上 CF_Authorization 值
