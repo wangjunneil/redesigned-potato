@@ -33,10 +33,14 @@
   img {
     width: 50px;
     height: 70px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    border: 2px solid #bebaba;
+    // padding-top: 5px;
+    // padding-bottom: 5px;
+    border: 1px solid #bebaba;
   }
+}
+
+.ant-image {
+  margin: 3px;
 }
 
 .ant-modal-footer {
