@@ -12,7 +12,7 @@ import {
   Divider,
   FloatButton,
   Select,
-  Spin,
+  Input,
   Modal,
   Skeleton,
 } from "antd";
@@ -25,7 +25,6 @@ import {
   queryTimeLineAll,
 } from "@/database/modules/TimeLineDataAction";
 import { splitDate } from "@/utils";
-import { getSecretValue } from "@/services";
 
 const [year, month, day] = splitDate();
 
@@ -61,6 +60,8 @@ const TimeLinePage = () => {
   const yearModalClose = () => {
     setShowModel(false);
   };
+
+  const submitLoginEmail = () => {};
 
   return (
     <div className="my-8 mx-auto w-5/6">
