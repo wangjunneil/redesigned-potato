@@ -1,5 +1,10 @@
 import React from "react";
 
+export const metadata = {
+  title: "JSON Formatter",
+  description: "online json formatter",
+};
+
 const JsonViewPage = () => {
   return (
     <div style={{ width: "100%", height: "100vh", overflow: "auto" }}>
