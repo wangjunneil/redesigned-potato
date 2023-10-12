@@ -1,8 +1,9 @@
 {
-  "theme_color": "#3b82f6",
+  "theme_color": "#f8fafc",
   "background_color": "#f8fafc",
   "display": "standalone",
   "scope": "/timeline",
+  "id": "/timeline",
   "start_url": "/timeline",
   "name": "LifeTimeLine",
   "short_name": "LifeTimeLine",
