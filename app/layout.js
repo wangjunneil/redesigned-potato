@@ -7,19 +7,12 @@ export const metadata = {
   title: "Life Time Line",
   description: "只是想做个记录",
   viewport: "width=device-width, initial-scale=1.0",
-  // manifest: "/manifest.json",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="manifest"
-          href="/manifest.json"
-          crossorigin="use-credentials"
-        />
-      </head>
       <body
         style={{ background: "url(/bg.webp) repeat 5px 5px" }}
         className={inter.className}
