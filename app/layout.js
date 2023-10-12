@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Life Time Line",
+  title: "Life TimeLine",
   description: "只是想做个记录",
   viewport: "width=device-width, initial-scale=1.0",
   manifest: "/manifest.json",
