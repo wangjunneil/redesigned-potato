@@ -66,8 +66,10 @@ const TimeLinePage = () => {
   return (
     <div className="my-8 mx-auto w-5/6">
       <h1 className="text-2xl text-center font-600">
-        Life Time Line
-        <span className="text-xs text-zinc-400 pl-2">Since 2023.09.01</span>
+        时间胶囊
+        <span className="text-xs text-zinc-400 pl-2">
+          WaitFor Open It, Since 2023.09.01
+        </span>
       </h1>
       <Divider orientation="left" plain></Divider>
       <Skeleton active={true} loading={loading}>
