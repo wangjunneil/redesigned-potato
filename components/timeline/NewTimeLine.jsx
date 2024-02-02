@@ -235,7 +235,7 @@ const NewTimeLine = (props) => {
                 <Upload
                   name="file"
                   multiple={false}
-                  accept=".png, .jpg, .jpeg, .mp4"
+                  accept=".png, .jpg, .jpeg, .mp4, .webp"
                   data={() => getUploadToken()}
                   beforeUpload={beforeUpload}
                   onChange={handleUploadChange}
