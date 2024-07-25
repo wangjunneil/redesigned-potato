@@ -42,6 +42,10 @@ module.exports = withPWA({
         protocol: "https",
         hostname: "restapi.amap.com",
       },
+      {
+        protocol: "http",
+        hostname: "1.13.189.65",
+      },
     ],
   },
 });
