@@ -48,11 +48,11 @@ const NewTimeLine = (props) => {
 
           (async () => {
             const sig = MD5(
-              `location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`,
+              `key=3e33b6ce0066e396d97bca3cb96a6693&location=${longitude},${latitude}5e3cc8332465902e96f82083f62e2df3`,
             );
             // 查询地理位置信息
             const response = await fetch(
-              `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693&sig=${sig}`,
+              `https://restapi.amap.com/v3/geocode/regeo?key=3e33b6ce0066e396d97bca3cb96a6693&location=${longitude},${latitude}&sig=${sig}`,
               { cache: "force-cache" },
             );
             const res = await response.json();
