@@ -11,6 +11,7 @@
   "dependencies": {
     "antd": "^5.8.5",
     "autoprefixer": "10.4.14",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.3.1",
     "infisical-node": "^1.4.3",
     "mongoose": "^7.5.0",

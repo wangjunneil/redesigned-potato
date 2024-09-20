@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UploadOutlined } from "@ant-design/icons";
+import MD5 from "crypto-js/md5";
 import {
   Drawer,
   Space,
@@ -43,12 +44,16 @@ const NewTimeLine = (props) => {
         (position) => {
           const longitude = position.coords.longitude;
           const latitude = position.coords.latitude;
+          console.log("longitude", longitude, "latitude", latitude);
 
           (async () => {
+            const sig = MD5(
+              `location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`,
+            );
             // 查询地理位置信息
             const response = await fetch(
-              `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`,
-              { cache: "force-cache" }
+              `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=3e33b6ce0066e396d97bca3cb96a6693&sig=${sig}`,
+              { cache: "force-cache" },
             );
             const res = await response.json();
             if (res?.info === "OK") {
@@ -67,7 +72,7 @@ const NewTimeLine = (props) => {
         },
         (error) => {
           console.error("获取位置信息时出现错误：", error);
-        }
+        },
       );
     } else {
       console.error("浏览器不支持地理位置获取");
@@ -102,7 +107,7 @@ const NewTimeLine = (props) => {
         // 查询位置天气信息
         const weatherResponse = await fetch(
           `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a6693`,
-          { cache: "force-cache" }
+          { cache: "force-cache" },
         );
         console.log("weatherResponse", weatherResponse);
         const weatherJson = await weatherResponse.json();
