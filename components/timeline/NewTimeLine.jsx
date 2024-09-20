@@ -104,9 +104,13 @@ const NewTimeLine = (props) => {
       console.log("geo", geo);
 
       if (geo?.adcode) {
+        const sig = MD5(
+          `city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a66935e3cc8332465902e96f82083f62e2df3`,
+        );
+
         // 查询位置天气信息
         const weatherResponse = await fetch(
-          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a6693`,
+          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a6693&sig=${sig}`,
           { cache: "force-cache" },
         );
         console.log("weatherResponse", weatherResponse);
