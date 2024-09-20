@@ -38,6 +38,9 @@ const NewTimeLine = (props) => {
   const [uploadFileList, setUploadFileList] = useState([]);
   const [geo, setGeo] = useState({});
 
+  const AMAP_ACCESS_KEY = process.env.AMAP_ACCESS_KEY;
+  const AMAP_PRIVATE_KEY = process.env.AMAP_PRIVATE_KEY;
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -48,11 +51,11 @@ const NewTimeLine = (props) => {
 
           (async () => {
             const sig = MD5(
-              `key=3e33b6ce0066e396d97bca3cb96a6693&location=${longitude},${latitude}5e3cc8332465902e96f82083f62e2df3`,
+              `key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}${AMAP_PRIVATE_KEY}`,
             );
             // 查询地理位置信息
             const response = await fetch(
-              `https://restapi.amap.com/v3/geocode/regeo?key=3e33b6ce0066e396d97bca3cb96a6693&location=${longitude},${latitude}&sig=${sig}`,
+              `https://restapi.amap.com/v3/geocode/regeo?key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}&sig=${sig}`,
               { cache: "force-cache" },
             );
             const res = await response.json();
@@ -105,12 +108,12 @@ const NewTimeLine = (props) => {
 
       if (geo?.adcode) {
         const sig = MD5(
-          `city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a66935e3cc8332465902e96f82083f62e2df3`,
+          `city=${geo.adcode}&key=${AMAP_ACCESS_KEY}${AMAP_PRIVATE_KEY}`,
         );
 
         // 查询位置天气信息
         const weatherResponse = await fetch(
-          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=3e33b6ce0066e396d97bca3cb96a6693&sig=${sig}`,
+          `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=${AMAP_ACCESS_KEY}&sig=${sig}`,
           { cache: "force-cache" },
         );
         console.log("weatherResponse", weatherResponse);
