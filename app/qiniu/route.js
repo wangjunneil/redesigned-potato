@@ -1,9 +1,11 @@
 import qiniu from "qiniu";
-import { getSecretValue } from "@/services";
+// import { getSecretValue } from "@/services";
 
 export async function GET(request) {
-  const QINIU_ACCESS_KEY = await getSecretValue("QINIU_ACCESS_KEY");
-  const QINIU_SECRET_KEY = await getSecretValue("QINIU_SECRET_KEY");
+  // const QINIU_ACCESS_KEY = await getSecretValue("QINIU_ACCESS_KEY");
+  // const QINIU_SECRET_KEY = await getSecretValue("QINIU_SECRET_KEY");
+  const QINIU_ACCESS_KEY = process.env.QINIU_ACCESS_KEY;
+  const QINIU_SECRET_KEY = process.env.QINIU_SECRET_KEY;
 
   var mac = new qiniu.auth.digest.Mac(QINIU_ACCESS_KEY, QINIU_SECRET_KEY);
   var options = {
@@ -27,8 +29,10 @@ export async function POST(request) {
   const res = await request.json();
   const key = res.key;
 
-  const QINIU_ACCESS_KEY = await getSecretValue("QINIU_ACCESS_KEY");
-  const QINIU_SECRET_KEY = await getSecretValue("QINIU_SECRET_KEY");
+  // const QINIU_ACCESS_KEY = await getSecretValue("QINIU_ACCESS_KEY");
+  // const QINIU_SECRET_KEY = await getSecretValue("QINIU_SECRET_KEY");
+  const QINIU_ACCESS_KEY = process.env.QINIU_ACCESS_KEY;
+  const QINIU_SECRET_KEY = process.env.QINIU_SECRET_KEY;
 
   var mac = new qiniu.auth.digest.Mac(QINIU_ACCESS_KEY, QINIU_SECRET_KEY);
   var config = new qiniu.conf.Config();

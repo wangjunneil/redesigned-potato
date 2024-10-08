@@ -1,11 +1,11 @@
 import React from "react";
 import { headers } from "next/headers";
 import Image from "next/image";
-import { getSecretValue } from "@/services";
+// import { getSecretValue } from "@/services";
 
 const get_ipdata = async (ip) => {
-  const API_KEY = await getSecretValue("IPIFY_API_KEY");
-  console.info("IPIFY_API_KEY", API_KEY);
+  // const API_KEY = await getSecretValue("IPIFY_API_KEY");
+  const API_KEY = process.env.IPIFY_API_KEY;
 
   const res = await fetch(
     `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${ip}`,
