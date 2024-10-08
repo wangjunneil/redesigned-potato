@@ -38,8 +38,8 @@ const NewTimeLine = (props) => {
   const [uploadFileList, setUploadFileList] = useState([]);
   const [geo, setGeo] = useState({});
 
-  const AMAP_ACCESS_KEY = process.env.AMAP_ACCESS_KEY;
-  const AMAP_PRIVATE_KEY = process.env.AMAP_PRIVATE_KEY;
+  const AMAP_ACCESS_KEY = "3e33b6ce0066e396d97bca3cb96a6693";
+  const AMAP_PRIVATE_KEY = "5e3cc8332465902e96f82083f62e2df3";
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -51,12 +51,12 @@ const NewTimeLine = (props) => {
 
           (async () => {
             const sig = MD5(
-              `key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}${AMAP_PRIVATE_KEY}`,
+              `key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}${AMAP_PRIVATE_KEY}`
             );
             // 查询地理位置信息
             const response = await fetch(
               `https://restapi.amap.com/v3/geocode/regeo?key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}&sig=${sig}`,
-              { cache: "force-cache" },
+              { cache: "force-cache" }
             );
             const res = await response.json();
             if (res?.info === "OK") {
@@ -75,7 +75,7 @@ const NewTimeLine = (props) => {
         },
         (error) => {
           console.error("获取位置信息时出现错误：", error);
-        },
+        }
       );
     } else {
       console.error("浏览器不支持地理位置获取");
@@ -108,13 +108,13 @@ const NewTimeLine = (props) => {
 
       if (geo?.adcode) {
         const sig = MD5(
-          `city=${geo.adcode}&key=${AMAP_ACCESS_KEY}${AMAP_PRIVATE_KEY}`,
+          `city=${geo.adcode}&key=${AMAP_ACCESS_KEY}${AMAP_PRIVATE_KEY}`
         );
 
         // 查询位置天气信息
         const weatherResponse = await fetch(
           `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=${AMAP_ACCESS_KEY}&sig=${sig}`,
-          { cache: "force-cache" },
+          { cache: "force-cache" }
         );
         console.log("weatherResponse", weatherResponse);
         const weatherJson = await weatherResponse.json();
