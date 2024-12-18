@@ -75,7 +75,7 @@ const NodeChild = (props) => {
             style={{ fontSize: "12px", color: "gray" }}
             target="_blank"
             rel="noopener noreferrer"
-            href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=3e33b6ce0066e396d97bca3cb96a6693`}
+            href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=${process.env.AMAP_ACCESS_KEY}`}
           >
             <Image
               src={"/location.png"}
