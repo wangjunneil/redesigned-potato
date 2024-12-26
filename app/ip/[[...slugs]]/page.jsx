@@ -1,10 +1,9 @@
 import React from "react";
 import { headers } from "next/headers";
 import Image from "next/image";
-// import { getSecretValue } from "@/services";
 
 const get_ipdata = async (ip) => {
-  const API_KEY = process.env.IP_API_KEY;
+  const API_KEY = process.env.IPIFY_API_KEY;
 
   const res = await fetch(
     `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${ip}`,
@@ -34,7 +33,6 @@ const IPPage = async ({ params }) => {
   // {code: 403, messages: 'Access restricted. Check credits balance or enter the correct API key.'}
   // https://geo.ipify.org/service/account-balance?apiKey=at_7cZromxgLsvsBaXToB3sYx1NRhqmJ
   let ip_data = await get_ipdata(ip);
-  console.info(ip_data);
 
   if (ip === "::1") {
     ip_data = { code: 100, messages: `invalid ip, ${ip}` };
