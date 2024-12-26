@@ -39,26 +39,30 @@ const IPPage = async ({ params }) => {
   }
 
   return ip_data.code ? (
-    <div className="inline p-3">
-      <span className="text-xs text-red-600">{ip_data.messages}</span>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="p-3">
+        <span className="text-xs text-red-600">{ip_data.messages}</span>
+      </div>
     </div>
   ) : (
-    <div style={{ padding: "10px" }}>
-      <Image
-        src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`}
-        width={32}
-        height={32}
-        alt="country"
-        className="align-middle inline"
-      />
-      <div className="text-green-800 font-bold align-middle pl-1 inline">
-        {ip_data.ip}
-        <span className="inline text-gray-400 pl-1 text-xs">
-          {ip_data?.location.country},{ip_data?.location.region},
-          {ip_data?.location.city}
-        </span>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="p-3">
+        <Image
+          src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`}
+          width={32}
+          height={32}
+          alt="country"
+          className="align-middle inline"
+        />
+        <div className="text-green-800 font-bold align-middle pl-1 inline">
+          {ip_data.ip}
+          <span className="inline text-gray-400 pl-1 text-xs">
+            {ip_data?.location.country},{ip_data?.location.region},
+            {ip_data?.location.city}
+          </span>
+        </div>
+        <div className="text-xs text-gray-400 pt-1">{user_agent}</div>
       </div>
-      <div className="text-xs text-gray-400 pt-1">{user_agent}</div>
     </div>
   );
 };
