@@ -39,13 +39,13 @@ const IPPage = async ({ params }) => {
   }
 
   return ip_data.code ? (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center min-h-screen pt-[30px]">
       <div className="p-3">
         <span className="text-xs text-red-600">{ip_data.messages}</span>
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center min-h-screen pt-[30px]">
       <div className="p-3">
         <Image
           src={`https://ipdata.co/flags/${ip_data.location.country.toLowerCase()}.png`}
