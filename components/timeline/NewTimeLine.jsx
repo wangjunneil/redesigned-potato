@@ -38,8 +38,8 @@ const NewTimeLine = (props) => {
   const [uploadFileList, setUploadFileList] = useState([]);
   const [geo, setGeo] = useState({});
 
-  const AMAP_ACCESS_KEY = process.env.AMAP_ACCESS_KEY;
-  const AMAP_PRIVATE_KEY = process.env.AMAP_PRIVATE_KEY;
+  const AMAP_ACCESS_KEY = process.env.NEXT_PUBLIC_AMAP_ACCESS_KEY;
+  const AMAP_PRIVATE_KEY = process.env.NEXT_PUBLIC_AMAP_PRIVATE_KEY;
 
   useEffect(() => {
     if (navigator.geolocation) {
