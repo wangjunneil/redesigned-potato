@@ -77,10 +77,12 @@ const TimeLinePage = () => {
           mode="left"
           items={timeLineData.map((item) => {
             return {
+              key: item.id,
               label: <NodeLabel timeLine={item} />,
               color: "gray",
               children: (
                 <NodeChild
+                  key={`child-${item.id}`}
                   timeLine={item}
                   isDelete={isDelete}
                   setIsDelete={setIsDelete}
