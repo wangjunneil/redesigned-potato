@@ -63,7 +63,7 @@ const NewTimeLine = (props) => {
               setGeo({
                 longitude: longitude,
                 latitude: latitude,
-                adcode: res.regeocode.addressComponent.adcode,
+                adcode: res.regeocode.addressComponent.adcode || "320100",
                 citycode: res.regeocode.addressComponent.citycode,
                 city: res.regeocode.addressComponent.city,
                 district: res.regeocode.addressComponent.district,
