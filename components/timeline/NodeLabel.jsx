@@ -6,9 +6,11 @@ const NodeLabel = (props) => {
     <div className="w-24">
       {timeLine.year}/{timeLine.month}/{timeLine.day}
       <div style={{ fontSize: "10px", color: "gray" }}>{timeLine.week}</div>
-      <div style={{ fontSize: "10px", color: "gray" }}>
-        {timeLine.weather.weather + " " + timeLine.weather.temperature + "℃"}
-      </div>
+      {timeLine.weather?.weather && timeLine.weather?.temperature && (
+        <div style={{ fontSize: "10px", color: "gray" }}>
+          {timeLine.weather.weather + " " + timeLine.weather.temperature + "℃"}
+        </div>
+      )}
     </div>
   );
 };
