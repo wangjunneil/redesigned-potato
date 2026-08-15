@@ -1,18 +1,34 @@
 import mongoose from "mongoose";
-// import { getSecretValue } from "@/services";
+
+const MONGODB_URL = process.env.MONGODB_URL;
+
+if (!MONGODB_URL) {
+  throw new Error("Please define the MONGODB_URL environment variable");
+}
+
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 async function connectMongo() {
-  // const MONGODB_URL = await getSecretValue("MONGODB_URL");
-  const MONGODB_URL = process.env.MONGODB_URL;
-
-  mongoose
-    .connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URL).then((mongoose) => {
       console.info("MongoDB connected");
-    })
-    .catch((error) => {
-      console.error(error);
+      return mongoose;
     });
+  }
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
 }
 
 export default connectMongo;

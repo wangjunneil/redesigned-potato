@@ -4,30 +4,30 @@ const timeLineDataSchema = new Schema(
   {
     year: {
       type: String,
-      require: true,
+      required: true,
     },
     month: {
       type: String,
-      require: true,
+      required: true,
     },
     day: {
       type: String,
-      require: true,
+      required: true,
     },
     week: {
       type: String,
-      require: true,
+      required: true,
     },
     weather: {
       type: Schema.Types.Mixed,
     },
     content: {
       type: String,
-      require: true,
+      required: true,
     },
     status: {
       type: String,
-      require: true,
+      required: true,
       default: "ENABLED",
       enum: ["ENABLED", "DISABLED"],
     },
@@ -36,13 +36,7 @@ const timeLineDataSchema = new Schema(
       set(imgs) {
         return imgs
           .filter((item) => item.status === "done")
-          .map((item) => {
-            return {
-              src: `${process.env.CDN_DOMAIN}/${item.response.key}`,
-              width: 1,
-              height: 1,
-            };
-          });
+          .map((item) => ({ src: `${process.env.CDN_DOMAIN}/${item.response.key}` }));
       },
     },
     creator: {
@@ -50,11 +44,14 @@ const timeLineDataSchema = new Schema(
     },
     video: {
       type: String,
+      default: "",
     },
     tags: {
       type: Array,
+      default: [],
     },
     extends: {
+      // Payload shape varies; `extends.geo` is the only shape currently used.
       type: Schema.Types.Mixed,
     },
   },

@@ -1,12 +1,15 @@
 "use server";
 
 import connectMongo from "@/database/mongodb";
+import { PAGE_SIZE } from "@/utils";
 import TimeLineData from "./TimeLineData";
 
-connectMongo();
-
 export async function createTimeLine(data) {
+  await connectMongo();
   try {
+    if (!data || !data.content || !data.year || !data.month || !data.day) {
+      throw new Error("Missing required fields: content, year, month, day");
+    }
     const newTimeLine = TimeLineData(data);
 
     await newTimeLine.save();
@@ -17,17 +20,16 @@ export async function createTimeLine(data) {
   }
 }
 
-export async function queryTimeLineAll(condition = null) {
+export async function queryTimeLineAll({ status, year, lastId = null, limit = PAGE_SIZE } = {}) {
+  await connectMongo();
   try {
-    const timelines = await TimeLineData.find(condition)
-      .sort({ _id: -1 })
-      .limit(30);
+    const query = {};
+    if (status) query.status = status;
+    if (year) query.year = year;
+    if (lastId) query._id = { $lt: lastId };
+    const timelines = await TimeLineData.find(query).sort({ _id: -1 }).limit(limit);
 
-    // id 转字符串
-    const newData = timelines.map((post) => ({
-      ...post._doc,
-      _id: post._doc._id.toString(),
-    }));
+    const newData = timelines.map((post) => ({ ...post._doc, _id: post._doc._id.toString() }));
 
     return newData;
   } catch (error) {
@@ -36,8 +38,10 @@ export async function queryTimeLineAll(condition = null) {
 }
 
 export async function enumTimeLineYear() {
+  await connectMongo();
   try {
     const years = await TimeLineData.distinct("year");
+    years.sort((a, b) => b - a);
     return years.map((year) => {
       return {
         label: year,
@@ -50,17 +54,11 @@ export async function enumTimeLineYear() {
 }
 
 export async function deleteTimeLine(condition) {
+  await connectMongo();
   try {
-    await TimeLineData.deleteOne(condition);
+    if (!condition?._id) throw new Error("Missing _id for delete");
+    await TimeLineData.deleteOne({ _id: condition._id });
   } catch (error) {
     throw new Error(error.message || "Failed to delete timeline");
-  }
-}
-
-export async function updateTimeLine(condition, data) {
-  try {
-    await TimeLineData.updateOne(condition, data);
-  } catch (error) {
-    throw new Error(error.message || "Failed to update timeline");
   }
 }

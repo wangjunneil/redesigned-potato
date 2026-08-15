@@ -1,11 +1,13 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   PlusOutlined,
   CalendarOutlined,
   CalendarFilled,
   DeleteOutlined,
   DeleteFilled,
+  MenuOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   Timeline,
@@ -14,6 +16,7 @@ import {
   Select,
   Modal,
   Skeleton,
+  Spin,
   message,
 } from "antd";
 import "./page.scss";
@@ -25,30 +28,46 @@ import {
   enumTimeLineYear,
   queryTimeLineAll,
 } from "@/database/modules/TimeLineDataAction";
-import { splitDate } from "@/utils";
-
-const [year, month, day] = splitDate();
+import { splitDate, PAGE_SIZE } from "@/utils";
 
 const TimeLinePage = () => {
+  const [year] = splitDate();
   const [open, setOpen] = useState(false);
   const [showModel, setShowModel] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [timeLineData, setTimeLineData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastId, setLastId] = useState(null);
   const [years, setYears] = useState([]);
   const [selectedYear, setSelectedYear] = useState(year);
 
   // 加载时间线数据
-  const loadTimeLineData = useCallback(async (yearValue) => {
+  const loadTimeLineData = useCallback(async (yearValue, lastId = null, append = false) => {
     try {
-      setLoading(true);
-      const res = await queryTimeLineAll({ status: "ENABLED", year: yearValue });
-      setTimeLineData(res);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      const res = await queryTimeLineAll({ status: "ENABLED", year: yearValue, lastId, limit: PAGE_SIZE });
+      if (append) {
+        setTimeLineData(prev => [...prev, ...res]);
+      } else {
+        setTimeLineData(res);
+      }
+      setHasMore(res.length === PAGE_SIZE);
+      if (res.length > 0) {
+        setLastId(res[res.length - 1]._id);
+      }
     } catch (error) {
       console.error("加载时间线数据失败:", error);
       message.error("加载数据失败，请稍后重试");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
@@ -60,8 +79,10 @@ const TimeLinePage = () => {
         const yearsList = await enumTimeLineYear();
         setYears(yearsList);
 
-        // 加载当前年份数据
-        await loadTimeLineData(selectedYear);
+        // 年份变更时重置分页状态
+        setLastId(null);
+        setHasMore(true);
+        await loadTimeLineData(selectedYear, null, false);
       } catch (error) {
         console.error("初始化失败:", error);
         message.error("初始化失败，请刷新页面");
@@ -70,13 +91,28 @@ const TimeLinePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
 
-  // 当删除操作完成后重新加载数据
+  // 当删除操作完成后重新加载数据（从头加载）
   useEffect(() => {
     if (!isDelete) {
-      loadTimeLineData(selectedYear);
+      setLastId(null);
+      setHasMore(true);
+      loadTimeLineData(selectedYear, null, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDelete]);
+
+  // 无限滚动：使用 IntersectionObserver 监听底部哨兵元素
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        loadTimeLineData(selectedYear, lastId, true);
+      }
+    }, { rootMargin: "200px" });
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, lastId, selectedYear, loadTimeLineData]);
 
   const handleChange = (value) => {
     setShowModel(false);
@@ -94,13 +130,15 @@ const TimeLinePage = () => {
       label: <NodeLabel timeLine={item} />,
       color: "gray",
       children: (
-        <NodeChild
-          key={`child-${item._id || item.id}`}
-          timeLine={item}
-          isDelete={isDelete}
-          setIsDelete={setIsDelete}
-          setLoading={setLoading}
-        />
+        <TimelineErrorBoundary key={`error-${item._id || item.id}`}>
+          <NodeChild
+            key={`child-${item._id || item.id}`}
+            timeLine={item}
+            isDelete={isDelete}
+            setIsDelete={setIsDelete}
+            setLoading={setLoading}
+          />
+        </TimelineErrorBoundary>
       ),
     }));
   }, [timeLineData, isDelete]);
@@ -114,20 +152,59 @@ const TimeLinePage = () => {
         </span>
       </h1>
       <Divider orientation="left" plain></Divider>
-      <Skeleton active={true} loading={loading}>
+      <Skeleton active={true} loading={loading && !loadingMore}>
         <Timeline mode="left" items={timelineItems} />
 
+        {/* 滚动加载哨兵 + loading 指示器 */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+        {loadingMore && (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <Spin size="small" />
+            <span style={{ marginLeft: 8, color: "#999", fontSize: 13 }}>加载中...</span>
+          </div>
+        )}
+        {!hasMore && timeLineData.length > 0 && (
+          <div style={{ textAlign: "center", padding: "20px 0", color: "#bbb", fontSize: 13 }}>没有更多了</div>
+        )}
+
         <FloatButton.Group shape="square">
-          <FloatButton
-            icon={showModel ? <CalendarFilled /> : <CalendarOutlined />}
-            onClick={() => setShowModel(true)}
-          />
-          <FloatButton
-            onClick={() => setIsDelete(!isDelete)}
-            icon={isDelete ? <DeleteFilled /> : <DeleteOutlined />}
-          />
-          <FloatButton onClick={() => setOpen(true)} icon={<PlusOutlined />} />
           <FloatButton.BackTop />
+          {expanded && (
+            <>
+              <FloatButton
+                className="timeline-float-action"
+                style={{ animationDelay: "0ms" }}
+                icon={showModel ? <CalendarFilled /> : <CalendarOutlined />}
+                onClick={() => {
+                  setShowModel(true);
+                  setExpanded(false);
+                }}
+              />
+              <FloatButton
+                className="timeline-float-action"
+                style={{ animationDelay: "60ms" }}
+                onClick={() => {
+                  setIsDelete(!isDelete);
+                  setExpanded(false);
+                }}
+                icon={isDelete ? <DeleteFilled /> : <DeleteOutlined />}
+              />
+              <FloatButton
+                className="timeline-float-action"
+                style={{ animationDelay: "120ms" }}
+                onClick={() => {
+                  setOpen(true);
+                  setExpanded(false);
+                }}
+                icon={<PlusOutlined />}
+              />
+            </>
+          )}
+          <FloatButton
+            className="timeline-float-trigger"
+            icon={expanded ? <CloseOutlined /> : <MenuOutlined />}
+            onClick={() => setExpanded(!expanded)}
+          />
         </FloatButton.Group>
       </Skeleton>
 
@@ -146,7 +223,7 @@ const TimeLinePage = () => {
         />
       </Modal>
 
-      <NewTimeLine open={open} setOpen={setOpen} onSuccess={() => loadTimeLineData(selectedYear)} />
+      <NewTimeLine open={open} setOpen={setOpen} onSuccess={() => { setLastId(null); setHasMore(true); loadTimeLineData(selectedYear, null, false); }} />
 
       <PWAInstallPrompt />
     </div>
@@ -154,3 +231,22 @@ const TimeLinePage = () => {
 };
 
 export default TimeLinePage;
+
+class TimelineErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error("Timeline item render error:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div style={{ color: "#999", fontSize: 12, padding: 8 }}>此条目渲染失败</div>;
+    }
+    return this.props.children;
+  }
+}

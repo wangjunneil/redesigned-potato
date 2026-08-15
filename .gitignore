@@ -44,3 +44,7 @@ next-env.d.ts
 
 yarn.lock
 .trigger
+
+# local opencode config + generated knowledge graph
+.opencode/
+graphify-out/

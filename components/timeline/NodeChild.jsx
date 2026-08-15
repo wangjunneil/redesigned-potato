@@ -1,15 +1,19 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { DeleteOutlined } from "@ant-design/icons";
 import { Row, Col, Button, Image, Spin, message } from "antd";
 import gfm from "remark-gfm";
 import { deleteTimeLine } from "@/database/modules/TimeLineDataAction";
+import { amapStaticMapUrl } from "@/lib/amap";
 
 const NodeChild = (props) => {
   const { timeLine, isDelete, setIsDelete, setLoading } = props;
   const [isVisible, setIsVisible] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentVideoSrc, setCurrentVideoSrc] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
   const containerRef = useRef(null);
 
   // 懒加载逻辑
@@ -34,18 +38,33 @@ const NodeChild = (props) => {
 
     observer.observe(currentRef);
 
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
-    };
+    return () => observer.disconnect();
   }, []);
+
+  // 获取高德地图静态图签名 URL
+  useEffect(() => {
+    if (timeLine.extends?.geo?.longitude && timeLine.extends?.geo?.latitude) {
+      const lng = timeLine.extends.geo.longitude;
+      const lat = timeLine.extends.geo.latitude;
+      const mapParams = {
+        location: `${lng},${lat}`,
+        zoom: "12",
+        size: "750*300",
+        scale: "2",
+        markers: `mid,,A:${lng},${lat}`,
+      };
+      amapStaticMapUrl(mapParams)
+        .then((url) => url && setMapUrl(url))
+        .catch(() => {});
+    }
+  }, [timeLine.extends?.geo?.longitude, timeLine.extends?.geo?.latitude]);
 
   const removeTimeLine = async (id) => {
     try {
       setLoading(true);
       await deleteTimeLine({ _id: id });
       setIsDelete(false);
+      setLoading(false);
       message.success("删除成功");
     } catch (error) {
       console.error("删除失败:", error);
@@ -147,7 +166,8 @@ const NodeChild = (props) => {
                 {images.map((item, index) => (
                   <Image
                     key={`image-${timeLine._id}-${index}`}
-                    src={item.src}
+                    src={`${item.src}?imageView2/2/w/200`}
+                    preview={{ src: item.src }}
                     width={50}
                     height={50}
                     style={{ objectFit: "cover", borderRadius: "4px" }}
@@ -185,7 +205,7 @@ const NodeChild = (props) => {
                 style={{ fontSize: "12px", color: "gray" }}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`https://restapi.amap.com/v3/staticmap?location=${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&zoom=12&size=750*300&scale=2&markers=mid,,A:${timeLine.extends.geo.longitude},${timeLine.extends.geo.latitude}&key=${process.env.NEXT_PUBLIC_AMAP_ACCESS_KEY}`}
+                href={mapUrl}
               >
                 <Image
                   src={"/location.png"}

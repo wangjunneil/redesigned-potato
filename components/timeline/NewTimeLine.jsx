@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { UploadOutlined } from "@ant-design/icons";
-import MD5 from "crypto-js/md5";
 import {
   Drawer,
   Space,
@@ -15,6 +16,7 @@ import {
 import dynamic from "next/dynamic";
 import { currentDate, splitDate } from "../../utils";
 import { createTimeLine } from "@/database/modules/TimeLineDataAction";
+import { amapGet } from "@/lib/amap";
 import "easymde/dist/easymde.min.css";
 import "./NewTimeLine.scss";
 
@@ -23,15 +25,42 @@ const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
   ssr: false,
 });
 
+const CREATOR = "wangjunneil@gmail.com";
+
 const weekDays = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  "周日",
+  "周一",
+  "周二",
+  "周三",
+  "周四",
+  "周五",
+  "周六",
 ];
+
+const mdeOptions = {
+  spellChecker: false,
+  placeholder: "总有那么一瞬间，想说些什么...",
+  status: false,
+  toolbar: [
+    "bold",
+    "italic",
+    "heading",
+    "|",
+    "quote",
+    "unordered-list",
+    "ordered-list",
+    "|",
+    "link",
+    "image",
+    "|",
+    "preview",
+    "guide",
+  ],
+  minHeight: "120px",
+  maxHeight: "300px",
+  autofocus: false,
+  hideIcons: ["side-by-side", "fullscreen"],
+};
 
 const NewTimeLine = (props) => {
   const { open, setOpen, onSuccess } = props;
@@ -40,48 +69,14 @@ const NewTimeLine = (props) => {
   const [loading, setLoading] = useState(false);
   const [tips, setTips] = useState("");
   const [uploadToken, setUploadToken] = useState();
-  const [fileKey, setFileKey] = useState();
   const [uploadFileList, setUploadFileList] = useState([]);
   const [geo, setGeo] = useState({});
   const [markdownValue, setMarkdownValue] = useState("");
 
-  const AMAP_ACCESS_KEY = process.env.NEXT_PUBLIC_AMAP_ACCESS_KEY;
-  const AMAP_PRIVATE_KEY = process.env.NEXT_PUBLIC_AMAP_PRIVATE_KEY;
-
   // 获取当前日期信息
-  const dateInfo = useMemo(() => {
-    const [year, month, day] = splitDate();
-    const dayOfWeek = new Date(`${year}-${month}-${day}`).getDay();
-    return { year, month, day, week: weekDays[dayOfWeek] };
-  }, []);
-
-  // 配置 SimpleMDE 编辑器选项
-  const mdeOptions = useMemo(() => {
-    return {
-      spellChecker: false,
-      placeholder: "总有那么一瞬间，想说些什么...",
-      status: false,
-      toolbar: [
-        "bold",
-        "italic",
-        "heading",
-        "|",
-        "quote",
-        "unordered-list",
-        "ordered-list",
-        "|",
-        "link",
-        "image",
-        "|",
-        "preview",
-        "guide",
-      ],
-      minHeight: "120px",
-      maxHeight: "300px",
-      autofocus: false,
-      hideIcons: ["side-by-side", "fullscreen"],
-    };
-  }, []);
+  const [year, month, day] = splitDate();
+  const dayOfWeek = new Date(`${year}-${month}-${day}`).getDay();
+  const dateInfo = { year, month, day, week: weekDays[dayOfWeek] };
 
   useEffect(() => {
     if (!open) return;
@@ -95,29 +90,21 @@ const NewTimeLine = (props) => {
 
           (async () => {
             try {
-              const sig = MD5(
-                `key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}${AMAP_PRIVATE_KEY}`
-              );
+              const res = await amapGet("/v3/geocode/regeo", {
+                location: `${longitude},${latitude}`,
+              });
 
-              const response = await fetch(
-                `https://restapi.amap.com/v3/geocode/regeo?key=${AMAP_ACCESS_KEY}&location=${longitude},${latitude}&sig=${sig}`,
-                { cache: "force-cache" }
-              );
-
-              if (response.ok) {
-                const res = await response.json();
-                if (res?.info === "OK") {
-                  setGeo({
-                    longitude: longitude,
-                    latitude: latitude,
-                    adcode: res.regeocode.addressComponent.adcode || "320100",
-                    citycode: res.regeocode.addressComponent.citycode,
-                    city: res.regeocode.addressComponent.city,
-                    district: res.regeocode.addressComponent.district,
-                    street: res.regeocode.addressComponent.township,
-                    formatted_address: res.regeocode.formatted_address,
-                  });
-                }
+              if (res?.info === "OK") {
+                setGeo({
+                  longitude: longitude,
+                  latitude: latitude,
+                  adcode: res.regeocode.addressComponent.adcode || "320100",
+                  citycode: res.regeocode.addressComponent.citycode,
+                  city: res.regeocode.addressComponent.city,
+                  district: res.regeocode.addressComponent.district,
+                  street: res.regeocode.addressComponent.township,
+                  formatted_address: res.regeocode.formatted_address,
+                });
               }
             } catch (error) {
               console.error("获取地理位置信息时出错:", error);
@@ -134,7 +121,7 @@ const NewTimeLine = (props) => {
     // 获取上传 token
     (async () => {
       try {
-        const response = await fetch("/qiniu", { cache: "no-cache" });
+        const response = await fetch("/api/qiniu", { cache: "no-cache" });
         if (response.ok) {
           const result = await response.json();
           if (result.status === "ok") {
@@ -145,13 +132,12 @@ const NewTimeLine = (props) => {
         console.error("获取上传token时出错:", error);
       }
     })();
-  }, [open, AMAP_ACCESS_KEY, AMAP_PRIVATE_KEY]);
+  }, [open]);
 
   const onClose = () => {
     form.resetFields();
     setOpen(false);
     setLoading(false);
-    setFileKey();
     setTips(null);
     setUploadFileList([]);
     setMarkdownValue("");
@@ -168,20 +154,13 @@ const NewTimeLine = (props) => {
 
       if (geo?.adcode) {
         try {
-          const sig = MD5(
-            `city=${geo.adcode}&key=${AMAP_ACCESS_KEY}${AMAP_PRIVATE_KEY}`
-          );
+          const weatherJson = await amapGet("/v3/weather/weatherInfo", {
+            city: geo.adcode,
+            extensions: "base",
+          });
 
-          const weatherResponse = await fetch(
-            `https://restapi.amap.com/v3/weather/weatherInfo?city=${geo.adcode}&key=${AMAP_ACCESS_KEY}&sig=${sig}`,
-            { cache: "force-cache" }
-          );
-
-          if (weatherResponse.ok) {
-            const weatherJson = await weatherResponse.json();
-            if (weatherJson?.info === "OK" && weatherJson?.lives?.length > 0) {
-              weatherData = weatherJson.lives[0];
-            }
+          if (weatherJson?.info === "OK" && weatherJson?.lives?.length > 0) {
+            weatherData = weatherJson.lives[0];
           }
         } catch (error) {
           console.error("获取天气信息时出错:", error);
@@ -196,9 +175,7 @@ const NewTimeLine = (props) => {
         weather: weatherData,
         content: values.content,
         photos: values.photos || [],
-        creator: "wangjunneil@gmail.com",
-        video: "",
-        tags: "",
+        creator: CREATOR,
         extends: {
           geo: geo || {},
         },
@@ -224,15 +201,11 @@ const NewTimeLine = (props) => {
     }
   };
 
-  const getUploadToken = () => {
-    return {
-      token: uploadToken,
-      key: fileKey,
-    };
-  };
-
   const beforeUpload = (file) => {
-    setFileKey(`wangjundev/timeline/${currentDate()}/${file.name}`);
+    if (!uploadToken) {
+      message.warning("上传服务初始化中，请稍后再试");
+      return Upload.LIST_IGNORE;
+    }
     return true;
   };
 
@@ -241,7 +214,7 @@ const NewTimeLine = (props) => {
     setLoading(true);
 
     const key = file.response.key;
-    fetch("/qiniu", {
+    fetch("/api/qiniu", {
       method: "POST",
       cache: "no-cache",
       headers: { "Content-Type": "application/json" },
@@ -338,10 +311,13 @@ const NewTimeLine = (props) => {
                   name="file"
                   multiple={false}
                   accept=".png, .jpg, .jpeg, .mp4, .webp"
-                  data={() => getUploadToken()}
+                  data={(file) => ({
+                    token: uploadToken,
+                    key: `wangjundev/timeline/${currentDate()}/${file.name}`,
+                  })}
                   beforeUpload={beforeUpload}
                   onChange={handleUploadChange}
-                  action="https://up-z0.qiniup.com"
+                  action="https://upload.qiniup.com"
                   listType="picture"
                   fileList={uploadFileList}
                   onRemove={deleteUploadFile}

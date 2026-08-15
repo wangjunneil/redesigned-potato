@@ -1,3 +1,5 @@
+export const PAGE_SIZE = 10;
+
 export const currentDate = () => {
   const currentDate = new Date();
   const year = currentDate.getFullYear();
