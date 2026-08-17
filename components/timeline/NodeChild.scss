@@ -1,0 +1,151 @@
+// 时间线卡片内 markdown 内容排版（作用域限定，避免影响其它页面）
+// 背景：Tailwind Preflight 重置了 ol/ul 的 list-style、标题的尺寸/字重等，
+// 导致有序/无序列表与引用在渲染后看不出语义。这里在 .timeline-markdown
+// 作用域内恢复 markdown 的排版样式（gfm 解析逻辑不变）。
+.timeline-markdown {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(0, 0, 0, 0.85);
+  word-break: break-word;
+
+  // 首个元素不出现多余上边距
+  > :first-child {
+    margin-top: 0;
+  }
+
+  // 段落
+  p {
+    margin: 0.6em 0;
+  }
+
+  // 标题：字号阶梯 + 加粗 + 层级间距
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 1.2em 0 0.5em;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+
+  h3 {
+    font-size: 1.25em;
+  }
+
+  h4 {
+    font-size: 1.15em;
+  }
+
+  h5 {
+    font-size: 1.05em;
+  }
+
+  h6 {
+    font-size: 1em;
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  // 列表：恢复 Preflight 吃掉的标记
+  ul,
+  ol {
+    // 与上下段落之间保持适度空隙，但不过分松散
+    margin: 0.4em 0;
+    padding-left: 1.6em;
+  }
+
+  ul {
+    list-style: disc;
+
+    ul {
+      list-style: circle;
+
+      ul {
+        list-style: square;
+      }
+    }
+  }
+
+  ol {
+    // 中文场景 decimal 足够清晰通用
+    list-style: decimal;
+
+    ol {
+      list-style: lower-alpha;
+
+      ol {
+        list-style: lower-roman;
+      }
+    }
+  }
+
+  li {
+    // 列表项之间紧凑：大幅收紧上下边距，并单独降低行高，让序号条目不松散
+    margin: 0.1em 0;
+    line-height: 1.5;
+
+    // 松散列表（li 内嵌段落）时收紧间距，避免挤在一起
+    > p {
+      margin: 0.1em 0;
+    }
+  }
+
+  // 引用：左侧竖条 + 缩进 + 浅灰底纹
+  blockquote {
+    margin: 0.8em 0;
+    padding: 0.4em 1em;
+    border-left: 4px solid #d9d9d9;
+    border-radius: 0 4px 4px 0;
+    background: #fafafa;
+    color: rgba(0, 0, 0, 0.65);
+
+    p {
+      margin: 0.4em 0;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // 加粗 / 斜体（Preflight 一般不影响，这里显式确认）
+  strong {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  // 链接：沿用全局主色，悬停加下划线
+  a {
+    color: #1677ff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // 图片：不超过卡片宽度
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    display: block;
+    margin: 0.6em 0;
+  }
+}

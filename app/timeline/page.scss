@@ -81,3 +81,26 @@ a {
     transform: translateY(0);
   }
 }
+
+// 悬浮按钮组配色
+// 页面背景为近白色（bg.webp 平均色 ≈ #f8f8f8），AntD 默认白底按钮几乎不可见。
+// 组内所有按钮（主触发器/子操作/BackTop）统一为灰黑底 + 白色图标，
+// 悬停时使用稍浅的灰黑。
+.ant-float-btn-group {
+  .timeline-float-trigger,
+  .timeline-float-action,
+  .timeline-float-backtop {
+    .ant-float-btn-body {
+      background-color: #1f2430;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #333b4d;
+      }
+
+      .ant-float-btn-content .ant-float-btn-icon {
+        color: #fff;
+      }
+    }
+  }
+}

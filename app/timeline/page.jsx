@@ -168,7 +168,7 @@ const TimeLinePage = () => {
         )}
 
         <FloatButton.Group shape="square">
-          <FloatButton.BackTop />
+          <FloatButton.BackTop className="timeline-float-backtop" />
           {expanded && (
             <>
               <FloatButton

@@ -52,12 +52,9 @@ const mdeOptions = {
     "|",
     "link",
     "image",
-    "|",
-    "preview",
-    "guide",
   ],
-  minHeight: "120px",
-  maxHeight: "300px",
+  minHeight: "60px",
+  maxHeight: "150px",
   autofocus: false,
   hideIcons: ["side-by-side", "fullscreen"],
 };
@@ -256,7 +253,9 @@ const NewTimeLine = (props) => {
   return (
     <Drawer
       title="瞬时心情"
+      className="timeline-drawer"
       placement={"bottom"}
+      height="50vh"
       closable={false}
       onClose={onClose}
       open={open}
@@ -265,7 +264,7 @@ const NewTimeLine = (props) => {
           <Button onClick={onClose}>取消</Button>
           <Button
             onClick={handleSubmit}
-            style={{ backgroundColor: "#1677ff" }}
+            className="timeline-btn-save"
             type="primary"
             htmlType="submit"
           >

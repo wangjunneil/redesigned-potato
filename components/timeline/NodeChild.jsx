@@ -7,6 +7,7 @@ import { Row, Col, Button, Image, Spin, message } from "antd";
 import gfm from "remark-gfm";
 import { deleteTimeLine } from "@/database/modules/TimeLineDataAction";
 import { amapStaticMapUrl } from "@/lib/amap";
+import "./NodeChild.scss";
 
 const NodeChild = (props) => {
   const { timeLine, isDelete, setIsDelete, setLoading } = props;
@@ -87,7 +88,7 @@ const NodeChild = (props) => {
     <div ref={containerRef}>
       <Row gutter={16}>
         <Col span={isDelete ? 20 : 24}>
-          <ReactMarkdown remarkPlugins={[gfm]}>
+          <ReactMarkdown className="timeline-markdown" remarkPlugins={[gfm]}>
             {timeLine.content}
           </ReactMarkdown>
         </Col>

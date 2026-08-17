@@ -22,9 +22,14 @@
       border-bottom: none;
       border-radius: 6px 6px 0 0;
       background: #fafafa;
+      // 单行显示：禁止按钮换行，极窄宽度时横向滚动而非折行
+      white-space: nowrap;
+      overflow-x: auto;
 
       button {
         color: rgba(0, 0, 0, 0.65);
+        // 消除 inline-block baseline 对齐导致的按钮上下错位
+        vertical-align: middle;
 
         &:hover {
           background: #e6f4ff;
@@ -40,11 +45,12 @@
       i.separator {
         border-left: 1px solid #d9d9d9;
         border-right: 1px solid #d9d9d9;
+        vertical-align: middle;
       }
     }
 
     .CodeMirror-scroll {
-      min-height: 120px;
+      min-height: 60px;
     }
 
     .editor-preview,
@@ -121,27 +127,22 @@
         button {
           width: 28px;
           height: 28px;
+          // 覆盖 easymde 自带的 min-width: 30px，让 28px 生效、更紧凑
+          min-width: 28px;
 
           &.no-mobile {
             display: none;
           }
         }
-
-        // 隐藏部分工具栏按钮以节省空间
-        .fa-question-circle,
-        .fa-arrows-alt,
-        .fa-columns {
-          display: none;
-        }
       }
 
       .CodeMirror {
         font-size: 16px; // 移动端使用更大字体，避免缩放
-        min-height: 100px;
+        min-height: 50px;
       }
 
       .CodeMirror-scroll {
-        min-height: 100px;
+        min-height: 50px;
       }
 
       .editor-preview,
@@ -161,5 +162,30 @@
         font-size: 15px;
       }
     }
+  }
+}
+
+// 抽屉「保存」按钮：与悬浮按钮组一致的灰黑底 + 白色文字（保持 type="primary"）
+.ant-drawer .ant-btn-primary.timeline-btn-save {
+  background-color: #1f2430;
+  border-color: #1f2430;
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.2);
+
+  &:not(:disabled):hover {
+    background-color: #333b4d;
+    border-color: #333b4d;
+  }
+}
+
+// 抽屉内容更贴合页面：收窄 body 内边距与表单项间距（作用域限定本抽屉）
+.timeline-drawer {
+  .ant-drawer-body {
+    // AntD 默认 padding: 24px，收窄后编辑器更贴近抽屉内壁
+    padding: 16px 16px 12px;
+  }
+
+  .ant-form-item {
+    // AntD 默认 margin-bottom: 24px，收窄后编辑器与「上传」之间更紧凑
+    margin-bottom: 16px;
   }
 }
