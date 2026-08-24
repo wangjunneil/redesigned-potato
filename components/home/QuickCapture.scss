@@ -1,0 +1,214 @@
+// 移动端快速录入页
+// 主题色：#1f2430（灰黑）→ 悬停 #333b4d，与时间线浮动按钮/保存按钮保持一致
+.quick-capture {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  background: #f6f7f9;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
+    "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+
+  &-title {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    margin: 8px 0 20px;
+    color: #1f2430;
+    letter-spacing: 0.02em;
+    position: relative;
+
+    // 标题下的小装饰线，与灰黑主题呼应
+    &::after {
+      content: "";
+      display: block;
+      width: 28px;
+      height: 3px;
+      margin: 10px auto 0;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #1f2430, #5b6478);
+    }
+  }
+
+  .markdown-editor-wrapper {
+    margin-bottom: 14px;
+
+    // —— EasyMDE 视觉融入 ——
+    .EasyMDEContainer {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(31, 36, 48, 0.08);
+      border-color: #e2e5ea;
+
+      .editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        border-bottom: 1px solid #eceef2;
+        background: #fff;
+
+        button {
+          border: none;
+          margin: 0;
+          color: #4a5366;
+          &:hover,
+          &.active {
+            background: #f1f2f6;
+            color: #1f2430;
+            border: none;
+          }
+        }
+      }
+
+      .CodeMirror {
+        font-size: 16px; // 移动端字号，避免 iOS 聚焦缩放
+        line-height: 1.6;
+        color: #23283a;
+        min-height: 120px;
+        border-radius: 0;
+      }
+
+      .CodeMirror-placeholder {
+        color: #a6adbb;
+      }
+
+      .editor-preview,
+      .CodeMirror-scroll {
+        border-radius: 0;
+      }
+    }
+  }
+
+  &-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+
+    // 拍照 / 从相册选：白底描边，与「保存」的灰黑实底形成层次
+    .ant-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+      border: 1px solid #d9dde4;
+      color: #1f2430;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #1f2430;
+        color: #1f2430;
+        background: #fff;
+      }
+
+      &:active {
+        background: #f1f2f6;
+        transform: scale(0.98);
+      }
+
+      .anticon {
+        font-size: 17px;
+      }
+    }
+  }
+
+  &-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  &-preview {
+    position: relative;
+    width: 76px;
+    height: 76px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(31, 36, 48, 0.15);
+      display: block;
+    }
+  }
+
+  &-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    line-height: 20px;
+    text-align: center;
+    background: rgba(31, 36, 48, 0.75);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    border: 1.5px solid #fff;
+    box-sizing: border-box;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #1f2430;
+    }
+  }
+
+  &-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  // 保存：灰黑实底，悬停 #333b4d，与时间线主按钮统一
+  &-save {
+    height: 46px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background-color: #1f2430;
+    border-color: #1f2430;
+    box-shadow: 0 4px 12px rgba(31, 36, 48, 0.25);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      background-color: #333b4d;
+      border-color: #333b4d;
+    }
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 6px rgba(31, 36, 48, 0.2);
+    }
+  }
+
+  &-enter {
+    width: 100%;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #4a5366;
+    border-color: #d9dde4;
+    background: transparent;
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      color: #1f2430;
+      border-color: #1f2430;
+      background: rgba(31, 36, 48, 0.04);
+    }
+
+    &:active {
+      background: rgba(31, 36, 48, 0.08);
+      transform: scale(0.99);
+    }
+  }
+}
