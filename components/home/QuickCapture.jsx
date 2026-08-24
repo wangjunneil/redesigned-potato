@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { CameraOutlined, PictureOutlined } from "@ant-design/icons";
+import { CameraOutlined, PictureOutlined, AudioOutlined } from "@ant-design/icons";
 import { Button, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -45,10 +45,14 @@ const QuickCapture = () => {
   const [geo, setGeo] = useState({});
   const [weather, setWeather] = useState({});
   const [saving, setSaving] = useState(false);
+  const [inputMode, setInputMode] = useState("voice"); // "voice" | "text"
+  const [recording, setRecording] = useState(false);
 
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
   const previewsRef = useRef([]);
+  const recognitionRef = useRef(null);
+  const recordingRef = useRef(false);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -115,6 +119,82 @@ const QuickCapture = () => {
     });
   };
 
+  const getSpeechRecognition = () =>
+    typeof window !== "undefined"
+      ? window.SpeechRecognition || window.webkitSpeechRecognition
+      : null;
+
+  const startRecording = () => {
+    if (recordingRef.current) return;
+    const SpeechRecognition = getSpeechRecognition();
+    if (!SpeechRecognition) {
+      message.warning("当前浏览器不支持语音识别");
+      return;
+    }
+    if (!recognitionRef.current) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "zh-CN";
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const res = event.results[i];
+          if (res?.[0]?.transcript) transcript += res[0].transcript;
+        }
+        if (transcript) {
+          setContent((prev) => (prev ? `${prev}\n${transcript}` : transcript));
+        }
+      };
+      recognition.onerror = (event) => {
+        if (event.error === "not-allowed") {
+          message.error("请允许麦克风权限");
+        } else if (event.error === "no-speech" || event.error === "aborted") {
+          // 无语音 / 主动停止：静默
+        } else {
+          message.error("语音识别出错，请重试");
+        }
+      };
+      recognition.onend = () => {
+        setRecording(false);
+        recordingRef.current = false;
+      };
+      recognitionRef.current = recognition;
+    }
+    recordingRef.current = true;
+    setRecording(true);
+    try {
+      recognitionRef.current.start();
+    } catch (e) {
+      console.warn("语音识别启动失败:", e);
+      recordingRef.current = false;
+      setRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (!recordingRef.current) return;
+    try {
+      recognitionRef.current?.stop();
+    } catch (e) {
+      console.warn("语音识别停止失败:", e);
+      setRecording(false);
+      recordingRef.current = false;
+    }
+  };
+
+  const handleMicPressStart = (e) => {
+    if (e.type === "touchstart") {
+      // 阻止合成 mouse 事件与长按菜单
+      e.preventDefault();
+    }
+    startRecording();
+  };
+
+  const handleMicPressEnd = () => {
+    stopRecording();
+  };
+
   const handleSave = async () => {
     if (!content.trim()) {
       message.warning("请输入内容");
@@ -159,13 +239,48 @@ const QuickCapture = () => {
     <div className="quick-capture">
       <h1 className="quick-capture-title">记下此刻</h1>
 
-      <div className="markdown-editor-wrapper">
-        <SimpleMDE
-          value={content}
-          onChange={(value) => setContent(value)}
-          options={mdeOptions}
-        />
-      </div>
+      {inputMode === "voice" ? (
+        <div className="quick-capture-voice">
+          <div
+            className={`quick-capture-mic${recording ? " is-recording" : ""}`}
+            role="button"
+            onMouseDown={handleMicPressStart}
+            onTouchStart={handleMicPressStart}
+            onMouseUp={handleMicPressEnd}
+            onTouchEnd={handleMicPressEnd}
+            onMouseLeave={handleMicPressEnd}
+            onTouchCancel={handleMicPressEnd}
+          >
+            <AudioOutlined />
+          </div>
+          <div
+            className={`quick-capture-mic-hint${recording ? " is-recording" : ""}`}
+          >
+            {recording ? "松开结束" : "按住说话"}
+          </div>
+          <div className="quick-capture-voice-content">
+            {content ? (
+              <div className="quick-capture-voice-text">{content}</div>
+            ) : (
+              <div className="quick-capture-voice-placeholder">
+                按住说话，松开后自动转成文字
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="markdown-editor-wrapper">
+          <SimpleMDE
+            value={content}
+            onChange={(value) => setContent(value)}
+            options={mdeOptions}
+          />
+        </div>
+      )}
+
+      <button className="quick-capture-switch" onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
+        {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
+      </button>
 
       <div className="quick-capture-actions">
         <Button icon={<CameraOutlined />} onClick={() => cameraInputRef.current?.click()}>
