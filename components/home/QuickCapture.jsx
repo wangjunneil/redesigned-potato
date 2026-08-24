@@ -106,7 +106,11 @@ const QuickCapture = () => {
     setFiles((prev) => [...prev, ...list]);
     setPreviews((prev) => [
       ...prev,
-      ...list.map((f) => ({ name: f.name, url: URL.createObjectURL(f) })),
+      ...list.map((f) => ({
+        name: f.name,
+        url: URL.createObjectURL(f),
+        isVideo: f.type.startsWith("video/"),
+      })),
     ]);
   };
 
@@ -151,6 +155,12 @@ const QuickCapture = () => {
           message.error("请允许麦克风权限");
         } else if (event.error === "no-speech" || event.error === "aborted") {
           // 无语音 / 主动停止：静默
+        } else if (
+          event.error === "service-not-allowed" ||
+          event.error === "audio-capture"
+        ) {
+          message.warning("当前设备无可用语音引擎，已切换到文本输入");
+          setInputMode("text");
         } else {
           message.error("语音识别出错，请重试");
         }
@@ -239,6 +249,54 @@ const QuickCapture = () => {
     <div className="quick-capture">
       <h1 className="quick-capture-title">记下此刻</h1>
 
+      <div className="quick-capture-actions">
+        <Button icon={<CameraOutlined />} onClick={() => cameraInputRef.current?.click()}>
+          拍照
+        </Button>
+        <Button icon={<PictureOutlined />} onClick={() => galleryInputRef.current?.click()}>
+          从相册选
+        </Button>
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*,video/*"
+          capture="environment"
+          hidden
+          onChange={(e) => {
+            addFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          hidden
+          onChange={(e) => {
+            addFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
+      {previews.length > 0 && (
+        <div className="quick-capture-previews">
+          {previews.map((p, i) => (
+            <div key={`${p.name}-${i}`} className="quick-capture-preview">
+              {p.isVideo ? (
+                <video src={p.url} muted playsInline />
+              ) : (
+                <img src={p.url} alt={p.name} />
+              )}
+              <span className="quick-capture-remove" onClick={() => removeFile(i)}>
+                ×
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {inputMode === "voice" ? (
         <div className="quick-capture-voice">
           <div
@@ -281,50 +339,6 @@ const QuickCapture = () => {
       <button className="quick-capture-switch" onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
       </button>
-
-      <div className="quick-capture-actions">
-        <Button icon={<CameraOutlined />} onClick={() => cameraInputRef.current?.click()}>
-          拍照
-        </Button>
-        <Button icon={<PictureOutlined />} onClick={() => galleryInputRef.current?.click()}>
-          从相册选
-        </Button>
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          onChange={(e) => {
-            addFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          onChange={(e) => {
-            addFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
-
-      {previews.length > 0 && (
-        <div className="quick-capture-previews">
-          {previews.map((p, i) => (
-            <div key={`${p.name}-${i}`} className="quick-capture-preview">
-              <img src={p.url} alt={p.name} />
-              <span className="quick-capture-remove" onClick={() => removeFile(i)}>
-                ×
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="quick-capture-footer">
         <Button

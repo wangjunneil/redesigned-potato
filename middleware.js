@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 
+function decodeBase64Url(str) {
+  const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    "="
+  );
+  return atob(padded);
+}
+
 function isExpired(jwt) {
   try {
     const parts = jwt.split(".");
     if (parts.length !== 3) return true;
-    const payload = JSON.parse(
-      Buffer.from(parts[1], "base64url").toString("utf8")
-    );
+    const payload = JSON.parse(decodeBase64Url(parts[1]));
     if (!payload.exp) return false; // no exp claim, fall through
     return Date.now() / 1000 > payload.exp;
   } catch {
