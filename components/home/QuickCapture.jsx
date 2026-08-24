@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { CameraOutlined, PictureOutlined, AudioOutlined } from "@ant-design/icons";
+import { CameraOutlined, PictureOutlined, AudioOutlined, HighlightOutlined } from "@ant-design/icons";
 import { Button, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -45,6 +45,7 @@ const QuickCapture = () => {
   const [geo, setGeo] = useState({});
   const [weather, setWeather] = useState({});
   const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [inputMode, setInputMode] = useState("voice"); // "voice" | "text"
   const [recording, setRecording] = useState(false);
 
@@ -261,6 +262,47 @@ const QuickCapture = () => {
     }
   };
 
+  const handleRefine = async () => {
+    if (!content.trim()) {
+      message.warning("请先输入内容");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/ai/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (res.status === 401) {
+        message.info("请先点底部「进入 timeline」完成验证");
+        return;
+      }
+      if (!res.ok) {
+        let errMsg = "AI 润色失败";
+        try {
+          const data = await res.json();
+          if (data?.error) errMsg = data.error;
+        } catch (e) {
+          // 响应体不是 JSON，用默认提示
+        }
+        message.error(errMsg);
+        return;
+      }
+      const data = await res.json();
+      if (data?.content) {
+        setContent(data.content);
+        message.success("润色完成");
+      } else {
+        message.error("AI 润色失败");
+      }
+    } catch (e) {
+      message.error("AI 润色失败");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   useEffect(() => {
     previewsRef.current = previews;
   }, [previews]);
@@ -361,6 +403,17 @@ const QuickCapture = () => {
           />
         </div>
       )}
+
+      <div className="quick-capture-refine-row">
+        <Button
+          className="quick-capture-refine"
+          icon={<HighlightOutlined />}
+          loading={aiLoading}
+          onClick={handleRefine}
+        >
+          AI 润色
+        </Button>
+      </div>
 
       <button className="quick-capture-switch" onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}

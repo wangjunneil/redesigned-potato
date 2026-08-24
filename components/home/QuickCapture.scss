@@ -140,6 +140,32 @@
     }
   }
 
+  // AI 润色按钮：紧跟输入区右下角，浅色描边、小尺寸、不喧宾夺主
+  &-refine-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 10px;
+  }
+
+  &-refine {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #d9dde4;
+    color: #1f2430;
+    box-shadow: 0 1px 3px rgba(31, 36, 48, 0.1);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      border-color: #1f2430;
+      color: #1f2430;
+      background: #fff;
+    }
+  }
+
   .markdown-editor-wrapper {
     margin-bottom: 14px;
 
