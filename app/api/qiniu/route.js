@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import qiniu from "qiniu";
+import { deleteQiniuFile } from "@/lib/qiniu";
 
 // 七牛云配置 - 从环境变量读取
 const QINIU_ACCESS_KEY = process.env.QINIU_ACCESS_KEY;
@@ -61,32 +62,15 @@ export async function POST(request) {
       );
     }
 
-    // 删除文件
-    const mac = new qiniu.auth.digest.Mac(QINIU_ACCESS_KEY, QINIU_SECRET_KEY);
-    const config = new qiniu.conf.Config();
-    const bucketManager = new qiniu.rs.BucketManager(mac, config);
-
-    return new Promise((resolve) => {
-      bucketManager.delete(QINIU_BUCKET, key, (err, respBody, respInfo) => {
-        if (err) {
-          console.error("删除文件失败:", err);
-          resolve(
-            NextResponse.json(
-              { status: "error", message: err.message },
-              { status: 500 }
-            )
-          );
-        } else {
-          console.log("删除文件成功:", key);
-          resolve(
-            NextResponse.json({
-              status: "ok",
-              message: "文件删除成功",
-            })
-          );
-        }
-      });
-    });
+    const ok = await deleteQiniuFile(key);
+    if (ok) {
+      console.log("删除文件成功:", key);
+      return NextResponse.json({ status: "ok", message: "文件删除成功" });
+    }
+    return NextResponse.json(
+      { status: "error", message: "文件删除失败" },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("删除文件失败:", error);
     return NextResponse.json(
