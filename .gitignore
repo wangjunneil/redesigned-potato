@@ -48,3 +48,5 @@ yarn.lock
 # local opencode config + generated knowledge graph
 .opencode/
 graphify-out/
+# superpowers scratch
+.superpowers/
