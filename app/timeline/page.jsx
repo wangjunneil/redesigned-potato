@@ -29,6 +29,8 @@ import {
   queryTimeLineAll,
 } from "@/database/modules/TimeLineDataAction";
 import { splitDate, PAGE_SIZE } from "@/utils";
+import { getDraft, clearDraft } from "@/lib/draftStore";
+import { submitTimeline } from "@/lib/timelineSubmit";
 
 const TimeLinePage = () => {
   const [year] = splitDate();
@@ -90,6 +92,31 @@ const TimeLinePage = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
+
+  // 挂载时检测并自动保存暂存草稿（移动端首页无 cookie 时暂存的内容）
+  useEffect(() => {
+    (async () => {
+      try {
+        const draft = await getDraft();
+        if (!draft) return;
+        await submitTimeline({
+          content: draft.content,
+          files: draft.files || [],
+          geo: {},
+          weather: {},
+        });
+        await clearDraft();
+        message.success("已自动保存暂存的内容");
+        setLastId(null);
+        setHasMore(true);
+        loadTimeLineData(selectedYear, null, false);
+      } catch (error) {
+        console.error("自动保存草稿失败:", error);
+        message.error("暂存内容保存失败，请重试");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 当删除操作完成后重新加载数据（从头加载）
   useEffect(() => {
