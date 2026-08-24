@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { CameraOutlined, PictureOutlined, AudioOutlined } from "@ant-design/icons";
-import { Button, Spin, message } from "antd";
+import { Button, message } from "antd";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { amapGet } from "@/lib/amap";
@@ -217,6 +217,8 @@ const QuickCapture = () => {
       // 阻止合成 mouse 事件与长按菜单
       e.preventDefault();
     }
+    // AI 润色中：不启动录音
+    if (aiLoading) return;
     startRecording();
   };
 
@@ -318,10 +320,10 @@ const QuickCapture = () => {
       <h1 className="quick-capture-title">记下此刻</h1>
 
       <div className="quick-capture-actions">
-        <Button icon={<CameraOutlined />} onClick={() => cameraInputRef.current?.click()}>
+        <Button icon={<CameraOutlined />} disabled={aiLoading} onClick={() => cameraInputRef.current?.click()}>
           拍照
         </Button>
-        <Button icon={<PictureOutlined />} onClick={() => galleryInputRef.current?.click()}>
+        <Button icon={<PictureOutlined />} disabled={aiLoading} onClick={() => galleryInputRef.current?.click()}>
           从相册选
         </Button>
         <input
@@ -368,7 +370,7 @@ const QuickCapture = () => {
       {inputMode === "voice" ? (
         <div className="quick-capture-voice">
           <div
-            className={`quick-capture-mic${recording ? " is-recording" : ""}`}
+            className={`quick-capture-mic${recording ? " is-recording" : ""}${aiLoading ? " is-disabled" : ""}`}
             role="button"
             onMouseDown={handleMicPressStart}
             onTouchStart={handleMicPressStart}
@@ -404,34 +406,30 @@ const QuickCapture = () => {
         </div>
       )}
 
-      <button className="quick-capture-switch" onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
+      <button className="quick-capture-switch" disabled={aiLoading} onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
       </button>
 
       <div className="quick-capture-footer">
         <div className="quick-capture-save-row">
-          <Button className="quick-capture-refine" loading={aiLoading} onClick={handleRefine}>
+          <Button className="quick-capture-refine" disabled={aiLoading || saving} onClick={handleRefine}>
             AI
+            {aiLoading && <span className="quick-capture-progress" />}
           </Button>
           <Button
             type="primary"
             className="quick-capture-save"
-            loading={saving}
+            disabled={saving || aiLoading}
             onClick={handleSave}
           >
             保存
+            {saving && <span className="quick-capture-progress" />}
           </Button>
         </div>
-        <Button className="quick-capture-enter" onClick={() => router.push("/timeline")}>
+        <Button className="quick-capture-enter" disabled={aiLoading} onClick={() => router.push("/timeline")}>
           进入 timeline
         </Button>
       </div>
-
-      {saving && (
-        <div style={{ textAlign: "center", marginTop: 12 }}>
-          <Spin size="small" />
-        </div>
-      )}
     </div>
   );
 };
