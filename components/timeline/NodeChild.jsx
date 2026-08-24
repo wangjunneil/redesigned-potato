@@ -206,7 +206,7 @@ const NodeChild = (props) => {
                 style={{ fontSize: "12px", color: "gray" }}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={mapUrl}
+                href={mapUrl || null}
               >
                 <Image
                   src={"/location.png"}

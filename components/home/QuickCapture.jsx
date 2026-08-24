@@ -54,52 +54,70 @@ const QuickCapture = () => {
   const recognitionRef = useRef(null);
   const recordingRef = useRef(false);
 
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const longitude = position.coords.longitude;
-        const latitude = position.coords.latitude;
-        try {
-          const res = await amapGet("/v3/geocode/regeo", {
-            location: `${longitude},${latitude}`,
-          });
-          if (res?.info === "OK") {
-            const c = res.regeocode.addressComponent;
-            setGeo({
-              longitude,
-              latitude,
-              adcode: c.adcode || "320100",
-              city: c.city,
-              district: c.district,
-              street: c.township,
-              formatted_address: res.regeocode.formatted_address,
+  const fetchGeoAndWeather = () =>
+    new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve({ geo: {}, weather: {} });
+      let settled = false;
+      const finish = (geo, weather) => {
+        if (settled) return;
+        settled = true;
+        resolve({ geo, weather });
+      };
+      const timer = setTimeout(() => finish({}, {}), 4000);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const longitude = position.coords.longitude;
+          const latitude = position.coords.latitude;
+          let geo = {};
+          let weather = {};
+          try {
+            const res = await amapGet("/v3/geocode/regeo", {
+              location: `${longitude},${latitude}`,
             });
+            if (res?.info === "OK") {
+              const c = res.regeocode.addressComponent;
+              geo = {
+                longitude,
+                latitude,
+                adcode: c.adcode || "320100",
+                city: c.city,
+                district: c.district,
+                street: c.township,
+                formatted_address: res.regeocode.formatted_address,
+              };
+              try {
+                const wres = await amapGet("/v3/weather/weatherInfo", {
+                  city: geo.adcode,
+                  extensions: "base",
+                });
+                if (wres?.info === "OK" && wres?.lives?.length > 0) {
+                  weather = wres.lives[0];
+                }
+              } catch (e) {
+                console.warn("天气获取失败:", e);
+              }
+            }
+          } catch (e) {
+            console.warn("定位失败:", e);
           }
-        } catch (e) {
-          console.warn("定位失败:", e);
+          clearTimeout(timer);
+          finish(geo, weather);
+        },
+        () => {
+          clearTimeout(timer);
+          finish({}, {});
         }
-      },
-      () => {}
-    );
-  }, []);
+      );
+    });
 
   useEffect(() => {
-    if (!geo?.adcode) return;
     (async () => {
-      try {
-        const res = await amapGet("/v3/weather/weatherInfo", {
-          city: geo.adcode,
-          extensions: "base",
-        });
-        if (res?.info === "OK" && res?.lives?.length > 0) {
-          setWeather(res.lives[0]);
-        }
-      } catch (e) {
-        console.warn("天气获取失败:", e);
-      }
+      const { geo: g, weather: w } = await fetchGeoAndWeather();
+      if (Object.keys(g).length) setGeo(g);
+      if (Object.keys(w).length) setWeather(w);
     })();
-  }, [geo?.adcode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addFiles = (newFiles) => {
     const list = Array.from(newFiles);
@@ -211,8 +229,16 @@ const QuickCapture = () => {
       return;
     }
     setSaving(true);
+    let finalGeo = geo;
+    let finalWeather = weather;
     try {
-      await submitTimeline({ content, files, geo, weather });
+      // 若天气还没拿到，保存前再兜底拉一次定位/天气（避免保存太快导致天气为空）
+      if (!finalWeather?.weather || !finalWeather?.temperature) {
+        const { geo: g, weather: w } = await fetchGeoAndWeather();
+        if (Object.keys(g).length) finalGeo = g;
+        if (Object.keys(w).length) finalWeather = w;
+      }
+      await submitTimeline({ content, files, geo: finalGeo, weather: finalWeather });
       message.success("保存成功");
       setContent("");
       setFiles([]);
@@ -220,7 +246,7 @@ const QuickCapture = () => {
       setPreviews([]);
     } catch (e) {
       try {
-        await saveDraft({ content, files, geo, weather });
+        await saveDraft({ content, files, geo: finalGeo, weather: finalWeather });
         if (e.message === "UNAUTHORIZED") {
           message.info("请先点底部「进入 timeline」完成验证，内容已暂存");
         } else {
