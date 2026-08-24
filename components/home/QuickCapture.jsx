@@ -48,6 +48,7 @@ const QuickCapture = () => {
 
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
+  const previewsRef = useRef([]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -115,8 +116,8 @@ const QuickCapture = () => {
   };
 
   const handleSave = async () => {
-    if (!content.trim() && files.length === 0) {
-      message.warning("请先输入内容或添加照片");
+    if (!content.trim()) {
+      message.warning("请输入内容");
       return;
     }
     setSaving(true);
@@ -128,16 +129,31 @@ const QuickCapture = () => {
       previews.forEach((p) => URL.revokeObjectURL(p.url));
       setPreviews([]);
     } catch (e) {
-      if (e.message === "UNAUTHORIZED") {
-        await saveDraft({ content, files });
-        message.info("请先点底部「进入 timeline」完成验证，内容已暂存");
-      } else {
-        message.error(e.message || "保存失败");
+      try {
+        await saveDraft({ content, files, geo, weather });
+        if (e.message === "UNAUTHORIZED") {
+          message.info("请先点底部「进入 timeline」完成验证，内容已暂存");
+        } else {
+          message.error("保存失败，内容已暂存，可稍后重试");
+        }
+      } catch (saveErr) {
+        console.error("暂存失败:", saveErr);
+        message.error("保存失败且暂存失败，请勿离开页面");
       }
     } finally {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    previewsRef.current = previews;
+  }, [previews]);
+
+  useEffect(() => {
+    return () => {
+      previewsRef.current.forEach((p) => p.url && URL.revokeObjectURL(p.url));
+    };
+  }, []);
 
   return (
     <div className="quick-capture">

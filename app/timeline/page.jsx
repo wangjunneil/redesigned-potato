@@ -102,14 +102,18 @@ const TimeLinePage = () => {
         await submitTimeline({
           content: draft.content,
           files: draft.files || [],
-          geo: {},
-          weather: {},
+          geo: draft.geo ?? {},
+          weather: draft.weather ?? {},
         });
-        await clearDraft();
+        try {
+          await clearDraft();
+        } catch (clearErr) {
+          console.error("清理草稿失败:", clearErr);
+        }
         message.success("已自动保存暂存的内容");
         setLastId(null);
         setHasMore(true);
-        loadTimeLineData(selectedYear, null, false);
+        await loadTimeLineData(selectedYear, null, false);
       } catch (error) {
         console.error("自动保存草稿失败:", error);
         message.error("暂存内容保存失败，请重试");
