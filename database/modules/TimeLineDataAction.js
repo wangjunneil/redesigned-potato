@@ -3,18 +3,11 @@
 import connectMongo from "@/database/mongodb";
 import { PAGE_SIZE } from "@/utils";
 import TimeLineData from "./TimeLineData";
+import { insertTimeLine } from "./timeLineRepository";
 
 export async function createTimeLine(data) {
-  await connectMongo();
   try {
-    if (!data || !data.content || !data.year || !data.month || !data.day) {
-      throw new Error("Missing required fields: content, year, month, day");
-    }
-    const newTimeLine = TimeLineData(data);
-
-    await newTimeLine.save();
-
-    return { ...newTimeLine._doc, _id: newTimeLine._id.toString() };
+    return await insertTimeLine(data);
   } catch (error) {
     throw new Error(error.message || "Failed to create timeline");
   }
