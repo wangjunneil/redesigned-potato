@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { CameraOutlined, PictureOutlined, AudioOutlined, HighlightOutlined } from "@ant-design/icons";
+import { CameraOutlined, PictureOutlined, AudioOutlined } from "@ant-design/icons";
 import { Button, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -404,30 +404,24 @@ const QuickCapture = () => {
         </div>
       )}
 
-      <div className="quick-capture-refine-row">
-        <Button
-          className="quick-capture-refine"
-          icon={<HighlightOutlined />}
-          loading={aiLoading}
-          onClick={handleRefine}
-        >
-          AI 润色
-        </Button>
-      </div>
-
       <button className="quick-capture-switch" onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
       </button>
 
       <div className="quick-capture-footer">
-        <Button
-          type="primary"
-          className="quick-capture-save"
-          loading={saving}
-          onClick={handleSave}
-        >
-          保存
-        </Button>
+        <div className="quick-capture-save-row">
+          <Button className="quick-capture-refine" loading={aiLoading} onClick={handleRefine}>
+            AI
+          </Button>
+          <Button
+            type="primary"
+            className="quick-capture-save"
+            loading={saving}
+            onClick={handleSave}
+          >
+            保存
+          </Button>
+        </div>
         <Button className="quick-capture-enter" onClick={() => router.push("/timeline")}>
           进入 timeline
         </Button>
