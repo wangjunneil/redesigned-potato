@@ -8,12 +8,18 @@ export const metadata = {
   description: '只是想做个记录',
   viewport: 'width=device-width, initial-scale=1.0',
   manifest: '/manifest.json',
-  themeColor: '#FFFFFF',
+  themeColor: '#f8fafc',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="LifeTimeLine" />
+      </head>
       <body
         style={{ background: 'url(/bg.webp) repeat 5px 5px' }}
         className={inter.className}
