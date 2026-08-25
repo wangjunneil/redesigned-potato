@@ -54,6 +54,12 @@ const QuickCapture = () => {
   const previewsRef = useRef([]);
   const recognitionRef = useRef(null);
   const recordingRef = useRef(false);
+  // 声纹波纹相关
+  const micBarsRef = useRef([]);
+  const analyserRef = useRef(null);
+  const streamRef = useRef(null);
+  const audioCtxRef = useRef(null);
+  const rafRef = useRef(null);
 
   const fetchGeoAndWeather = () =>
     new Promise((resolve) => {
@@ -187,6 +193,7 @@ const QuickCapture = () => {
       recognition.onend = () => {
         setRecording(false);
         recordingRef.current = false;
+        stopWaveform();
       };
       recognitionRef.current = recognition;
     }
@@ -194,8 +201,10 @@ const QuickCapture = () => {
     setRecording(true);
     try {
       recognitionRef.current.start();
+      startWaveform();
     } catch (e) {
       console.warn("语音识别启动失败:", e);
+      stopWaveform();
       recordingRef.current = false;
       setRecording(false);
     }
@@ -210,6 +219,77 @@ const QuickCapture = () => {
       setRecording(false);
       recordingRef.current = false;
     }
+    stopWaveform();
+  };
+
+  // —— 声纹波纹：AudioContext + AnalyserNode + rAF，ref 直写 DOM ——
+  const startWaveform = async () => {
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) return; // 无能力则静默跳过
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8; // 起伏平滑
+      source.connect(analyser);
+      streamRef.current = stream;
+      audioCtxRef.current = ctx;
+      analyserRef.current = analyser;
+      startWaveformLoop();
+    } catch (e) {
+      // 静默降级：权限被拒 / iOS 等，不打断语音识别
+      console.warn("声纹波纹不可用:", e);
+    }
+  };
+
+  const startWaveformLoop = () => {
+    const analyser = analyserRef.current;
+    const bars = micBarsRef.current;
+    if (!analyser || bars.length === 0) return;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const tick = () => {
+      const a = analyserRef.current;
+      const bs = micBarsRef.current;
+      if (!a || bs.length === 0) return;
+      a.getByteFrequencyData(dataArray);
+      const len = dataArray.length;
+      const step = len / (bs.length + 1);
+      // 每根柱子取不同频段，错落起伏；直接写 style.transform，不触发重渲染
+      for (let i = 0; i < bs.length; i++) {
+        const v = dataArray[Math.floor(step * (i + 1))] / 255;
+        const scale = Math.max(0.2, Math.min(1, v * 1.15 + 0.25));
+        const el = bs[i];
+        if (el) el.style.transform = `scaleY(${scale.toFixed(3)})`;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  };
+
+  const stopWaveform = () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
+    }
+    analyserRef.current = null;
+    micBarsRef.current.forEach((el) => {
+      if (el) el.style.transform = "scaleY(0.2)"; // 柱子复位
+    });
   };
 
   const handleMicPressStart = (e) => {
@@ -315,6 +395,14 @@ const QuickCapture = () => {
     };
   }, []);
 
+  // 组件卸载：清理声纹波纹
+  useEffect(() => {
+    return () => {
+      stopWaveform();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="quick-capture">
       <h1 className="quick-capture-title">记下此刻</h1>
@@ -379,7 +467,18 @@ const QuickCapture = () => {
             onMouseLeave={handleMicPressEnd}
             onTouchCancel={handleMicPressEnd}
           >
-            <AudioOutlined />
+            <AudioOutlined className="quick-capture-mic-icon" />
+            <div className="quick-capture-wave">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  ref={(el) => {
+                    micBarsRef.current[i] = el;
+                  }}
+                  className="quick-capture-wave-bar"
+                />
+              ))}
+            </div>
           </div>
           <div
             className={`quick-capture-mic-hint${recording ? " is-recording" : ""}`}

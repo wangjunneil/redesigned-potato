@@ -98,6 +98,34 @@
       transform: scale(0.95);
     }
 
+    // 麦克风图标：录音时淡出
+    .quick-capture-mic-icon {
+      transition: opacity 0.2s ease;
+    }
+
+    // 声纹波纹容器（绝对叠在图标上）
+    .quick-capture-wave {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    // 波纹柱：白色圆头小柱，scaleY 从中心对称伸缩
+    .quick-capture-wave-bar {
+      width: 3px;
+      height: 36px;
+      border-radius: 2px;
+      background: #fff;
+      transform: scaleY(0.2); // 静默时也留小柱
+      transform-origin: center;
+    }
+
     // 待命小光点（青绿）
     &::after {
       content: "";
@@ -124,6 +152,14 @@
         background: #fff;
         box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
         animation: quick-capture-blink 1s steps(1, end) infinite;
+      }
+
+      // 图标淡出、波纹淡入
+      .quick-capture-mic-icon {
+        opacity: 0;
+      }
+      .quick-capture-wave {
+        opacity: 1;
       }
     }
 
