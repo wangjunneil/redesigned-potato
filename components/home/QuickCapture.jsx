@@ -457,6 +457,17 @@ const QuickCapture = () => {
 
       {inputMode === "voice" ? (
         <div className="quick-capture-voice">
+          <div className={`quick-capture-wave${recording ? " is-active" : ""}`}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span
+                key={i}
+                ref={(el) => {
+                  micBarsRef.current[i] = el;
+                }}
+                className="quick-capture-wave-bar"
+              />
+            ))}
+          </div>
           <div
             className={`quick-capture-mic${recording ? " is-recording" : ""}${aiLoading ? " is-disabled" : ""}`}
             role="button"
@@ -467,18 +478,7 @@ const QuickCapture = () => {
             onMouseLeave={handleMicPressEnd}
             onTouchCancel={handleMicPressEnd}
           >
-            <AudioOutlined className="quick-capture-mic-icon" />
-            <div className="quick-capture-wave">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <span
-                  key={i}
-                  ref={(el) => {
-                    micBarsRef.current[i] = el;
-                  }}
-                  className="quick-capture-wave-bar"
-                />
-              ))}
-            </div>
+            <AudioOutlined />
           </div>
           <div
             className={`quick-capture-mic-hint${recording ? " is-recording" : ""}`}

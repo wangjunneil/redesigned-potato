@@ -68,6 +68,35 @@
     animation: quick-capture-rise 0.4s 0.05s ease both;
   }
 
+  // —— 声纹显示区：独立于麦克风，录音时在按钮上方淡入 ——
+  &-wave {
+    width: 100%;
+    max-width: 280px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0 auto 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+
+    &.is-active {
+      opacity: 1;
+    }
+  }
+
+  // 波纹柱：珊瑚红圆头，scaleY 从中心对称伸缩，静默留小柱
+  &-wave-bar {
+    width: 4px;
+    height: 44px;
+    border-radius: 3px;
+    background: var(--coral);
+    transform: scaleY(0.2);
+    transform-origin: center;
+  }
+
   // —— 麦克风：白底圆钮，青绿待命 / 珊瑚红录音 ——
   &-mic {
     position: relative;
@@ -98,34 +127,6 @@
       transform: scale(0.95);
     }
 
-    // 麦克风图标：录音时淡出
-    .quick-capture-mic-icon {
-      transition: opacity 0.2s ease;
-    }
-
-    // 声纹波纹容器（绝对叠在图标上）
-    .quick-capture-wave {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    // 波纹柱：白色圆头小柱，scaleY 从中心对称伸缩
-    .quick-capture-wave-bar {
-      width: 3px;
-      height: 36px;
-      border-radius: 2px;
-      background: #fff;
-      transform: scaleY(0.2); // 静默时也留小柱
-      transform-origin: center;
-    }
-
     // 待命小光点（青绿）
     &::after {
       content: "";
@@ -152,14 +153,6 @@
         background: #fff;
         box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
         animation: quick-capture-blink 1s steps(1, end) infinite;
-      }
-
-      // 图标淡出、波纹淡入
-      .quick-capture-mic-icon {
-        opacity: 0;
-      }
-      .quick-capture-wave {
-        opacity: 1;
       }
     }
 
