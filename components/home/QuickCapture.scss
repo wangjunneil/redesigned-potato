@@ -1,82 +1,60 @@
 // ============================================================
-// 移动端快速录入页 · 视觉重设计（深色版）
-// 美学方向：深夜时间胶囊
-//   深夜深空底（不透明，盖住 bg.webp）+ 琥珀暖光 + 冷灰文字
-//   标题衬线（Noto Serif SC / Songti SC），正文等宽（记录舱日志感）
-//   发光光点麦克风、光片相框预览、星云噪点背景、星点微闪
+// 移动端快速录入页 · 视觉重设计（简约 · 圆润 · 紧凑）
+// 美学方向：现代极简、清爽高级感
+//   浅灰白纯色背景 + 白色卡片 + 墨色文字 + 单一青绿强调色
+//   大圆角、柔和弥散阴影、紧凑控件间距、克制动效
+//   无纸纹 / 无星空噪点 / 无装饰纹理
 // 功能 100% 不变：仅重写样式，JSX / class 名 / 逻辑均未动
 // ============================================================
 
 .quick-capture {
-  // —— 深夜色板 ——
-  --night: #0c0f17; // 近黑深空底
-  --night-deep: #0a0d14; // 更深处
-  --panel: #131a26; // 面板深蓝灰
-  --panel-light: #1a2332; // 面板亮面
-  --amber: #e8b04b; // 琥珀暖光
-  --amber-bright: #f0c674; // 亮琥珀
-  --amber-pale: #f5d7a1; // 浅琥珀（文字强调）
-  --text-warm: #e6e1d5; // 暖白文字
-  --text-cool: #8a93a3; // 次级冷灰
-  --text-dim: #5a6474; // 弱化文字
-  --line: rgba(240, 198, 116, 0.25); // 琥珀半透明描边
-  --line-faint: rgba(240, 198, 116, 0.12); // 更弱描边
+  // —— 极简色板 ——
+  --bg: #f7f8fa; // 浅灰白背景
+  --card: #ffffff; // 卡片 / 面板
+  --ink: #1f2430; // 墨色文字
+  --gray: #6b7280; // 次级灰
+  --gray-faint: #9ca3af; // 弱化灰
+  --teal: #0d9488; // 青绿（单强调色）
+  --teal-deep: #0f766e; // 青绿深（悬停）
+  --coral: #e5484d; // 珊瑚红（仅录音态）
+  --line: #e5e7eb; // 细描边
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04),
+    0 4px 12px rgba(16, 24, 40, 0.06); // 柔和弥散阴影
 
   max-width: 480px;
   margin: 0 auto;
-  padding: 28px 16px calc(32px + env(safe-area-inset-bottom));
+  padding: 24px 16px calc(28px + env(safe-area-inset-bottom));
   min-height: 100dvh;
 
-  // 深夜太空背景：星尘噪点 + 星云深蓝 + 底部琥珀余晖 + 暗角
-  // 容器不透明，完全盖住 body 的 bg.webp
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>")
-      repeat,
-    radial-gradient(ellipse at 50% 110%, rgba(232, 176, 75, 0.1), transparent 55%),
-    radial-gradient(ellipse at 15% -5%, rgba(58, 82, 130, 0.4), transparent 55%),
-    radial-gradient(ellipse at center, transparent 60%, rgba(5, 7, 12, 0.5) 100%),
-    linear-gradient(180deg, #0c0f17 0%, #101726 55%, #0a0d14 100%);
+  // 纯色干净背景（不透明，盖住 body 的 bg.webp），无纹理
+  background: var(--bg);
 
-  // 等宽正文：记录舱日志感
-  font-family: "SF Mono", ui-monospace, "Menlo", "Consolas", "PingFang SC", monospace;
-  color: var(--text-warm);
+  // 简洁无衬线：靠排版 / 间距 / 配色做出高级感
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 
-  // —— 标题：衬线大题 + 发光光点 + 琥珀细线 ——
+  // —— 标题：克制、留白 ——
   &-title {
-    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
-    font-size: 30px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 600;
     text-align: center;
-    margin: 6px 0 22px;
-    color: var(--amber-pale);
-    letter-spacing: 0.18em; // 太空感标题间距
-    text-shadow: 0 0 24px rgba(240, 198, 116, 0.25);
+    margin: 4px 0 18px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
     position: relative;
-    animation: quick-capture-rise 0.5s ease both;
+    animation: quick-capture-rise 0.4s ease both;
 
-    // 星点光点：像在封存一枚星光
-    &::before {
-      content: "";
-      display: block;
-      width: 10px;
-      height: 10px;
-      margin: 0 auto 14px;
-      border-radius: 50%;
-      background: var(--amber-bright);
-      box-shadow: 0 0 14px 4px rgba(240, 198, 116, 0.45);
-      animation: quick-capture-twinkle 2.4s ease-in-out infinite;
-    }
-
-    // 琥珀发光细线
+    // 一条克制的青绿短条
     &::after {
       content: "";
       display: block;
-      width: 72px;
-      height: 2px;
-      margin: 14px auto 0;
-      background: linear-gradient(90deg, transparent, var(--amber), transparent);
-      box-shadow: 0 0 10px rgba(240, 198, 116, 0.4);
+      width: 32px;
+      height: 4px;
+      margin: 10px auto 0;
+      border-radius: 2px;
+      background: var(--teal);
     }
   }
 
@@ -85,64 +63,66 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 14px 0 6px;
-    margin-bottom: 16px;
-    animation: quick-capture-rise 0.5s 0.08s ease both;
+    padding: 16px 0 4px;
+    margin-bottom: 12px;
+    animation: quick-capture-rise 0.4s 0.05s ease both;
   }
 
-  // —— 麦克风：会发光的胶囊光点 ——
+  // —— 麦克风：白底圆钮，青绿待命 / 珊瑚红录音 ——
   &-mic {
     position: relative;
-    width: 92px;
-    height: 92px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(19, 26, 38, 0.85);
-    border: 2px solid rgba(240, 198, 116, 0.55);
-    color: var(--amber-bright);
+    background: var(--card);
+    border: 2px solid rgba(13, 148, 136, 0.35);
+    color: var(--teal);
     font-size: 36px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none; // 按住录音时阻止页面滚动
     -webkit-tap-highlight-color: transparent;
-    box-shadow:
-      0 0 22px 4px rgba(232, 176, 75, 0.22),
-      0 8px 22px rgba(0, 0, 0, 0.5);
-    transition: all 0.25s ease;
+    box-shadow: var(--shadow-soft);
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.15s ease;
 
     &:active {
-      transform: scale(0.94);
+      transform: scale(0.95);
     }
 
-    // 点亮的小光点（待命指示）
+    // 待命小光点（青绿）
     &::after {
       content: "";
       position: absolute;
-      top: 12px;
-      right: 14px;
-      width: 10px;
-      height: 10px;
+      top: 14px;
+      right: 16px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
-      background: transparent;
-      box-shadow: none;
+      background: rgba(13, 148, 136, 0.35);
       transition:
         background 0.2s ease,
         box-shadow 0.2s ease;
     }
 
-    // 录制中：琥珀实底「光片」+ 呼吸光晕扩散 + 光点亮起
+    // 录音中：珊瑚红 + 克制的呼吸
     &.is-recording {
-      background: var(--amber);
-      border-color: var(--amber-bright);
-      color: var(--night);
-      animation: quick-capture-rec 1.3s ease-in-out infinite;
+      background: var(--coral);
+      border-color: var(--coral);
+      color: #fff;
+      animation: quick-capture-rec 1.4s ease-in-out infinite;
 
       &::after {
-        background: var(--night);
-        box-shadow: 0 0 8px 2px rgba(12, 15, 23, 0.5);
+        background: #fff;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
         animation: quick-capture-blink 1s steps(1, end) infinite;
       }
     }
@@ -155,91 +135,86 @@
     }
   }
 
-  // 麦克风下方提示：等宽小字
+  // 麦克风下方提示
   &-mic-hint {
-    margin-top: 14px;
-    font-size: 14px;
-    letter-spacing: 0.08em;
-    color: var(--text-cool);
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--gray);
     transition: color 0.2s ease;
 
     &.is-recording {
-      color: var(--amber-pale);
-      text-shadow: 0 0 12px rgba(240, 198, 116, 0.4);
+      color: var(--coral);
     }
   }
 
   &-voice-content {
     width: 100%;
-    margin-top: 18px;
+    margin-top: 14px;
   }
 
-  // 转写回写卡：记录舱日志面板
+  // 转写回写卡：白色圆角卡片
   &-voice-text {
     width: 100%;
     white-space: pre-wrap;
     word-break: break-word;
     font-size: 15px;
-    line-height: 1.85;
-    color: var(--text-warm);
-    background: rgba(19, 26, 38, 0.88);
-    border: 1px solid var(--line-faint);
-    border-left: 3px solid rgba(240, 198, 116, 0.55); // 琥珀侧光条
-    border-radius: 12px;
+    line-height: 1.75;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
     padding: 14px 16px;
     max-height: 240px;
     overflow-y: auto;
-    box-shadow:
-      0 0 0 1px rgba(240, 198, 116, 0.04) inset,
-      0 4px 18px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-soft);
   }
 
   &-voice-text::-webkit-scrollbar {
     width: 4px;
   }
   &-voice-text::-webkit-scrollbar-thumb {
-    background: rgba(240, 198, 116, 0.25);
+    background: var(--line);
     border-radius: 2px;
   }
 
   &-voice-placeholder {
     width: 100%;
     font-size: 14px;
-    letter-spacing: 0.04em;
-    color: var(--text-dim);
+    color: var(--gray-faint);
     text-align: center;
-    padding: 26px 0;
-    background: rgba(19, 26, 38, 0.55);
+    padding: 24px 0;
+    background: rgba(255, 255, 255, 0.6);
     border: 1px dashed var(--line);
-    border-radius: 12px;
+    border-radius: 18px;
   }
 
-  // —— 文本模式：EasyMDE 暗色化 ——
+  // —— 文本模式：EasyMDE 白卡化 ——
   .markdown-editor-wrapper {
-    margin-bottom: 14px;
-    animation: quick-capture-rise 0.5s 0.08s ease both;
+    margin-bottom: 12px;
+    animation: quick-capture-rise 0.4s 0.05s ease both;
 
     .EasyMDEContainer {
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
-      border-color: var(--line-faint);
+      box-shadow: var(--shadow-soft);
+      border-color: var(--line);
 
       .editor-toolbar {
         display: flex;
         flex-wrap: wrap;
         gap: 2px;
-        border-bottom: 1px solid var(--line-faint);
-        background: var(--panel-light);
+        border-bottom: 1px solid var(--line);
+        background: var(--card);
 
         button {
           border: none;
           margin: 0;
-          color: var(--text-cool);
+          color: var(--gray);
           &:hover,
           &.active {
-            background: rgba(240, 198, 116, 0.12);
-            color: var(--amber-bright);
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--teal);
             border: none;
           }
         }
@@ -247,16 +222,16 @@
 
       .CodeMirror {
         font-size: 16px; // 移动端字号，避免 iOS 聚焦缩放
-        line-height: 1.85;
-        font-family: "SF Mono", ui-monospace, "Menlo", "Consolas", "PingFang SC", monospace;
-        color: var(--text-warm);
+        line-height: 1.75;
+        font-family: inherit;
+        color: var(--ink);
         min-height: 120px;
         border-radius: 0;
-        background: rgba(19, 26, 38, 0.9);
+        background: var(--card);
       }
 
       .CodeMirror-placeholder {
-        color: var(--text-dim);
+        color: var(--gray-faint);
       }
 
       .editor-preview,
@@ -266,155 +241,124 @@
     }
   }
 
-  // —— 拍照 / 从相册选：暗夜面板按钮 ——
+  // —— 拍照 / 从相册选：白底细描边，紧凑 ——
   &-actions {
     display: flex;
     gap: 10px;
-    margin-bottom: 16px;
-    animation: quick-capture-rise 0.5s 0.06s ease both;
+    margin-bottom: 12px;
+    animation: quick-capture-rise 0.4s 0.05s ease both;
 
     .ant-btn {
       flex: 1;
-      height: 46px;
-      border-radius: 12px;
+      height: 42px;
+      border-radius: 14px;
       font-size: 14px;
-      letter-spacing: 0.06em;
-      background: rgba(19, 26, 38, 0.7);
+      background: var(--card);
       border: 1px solid var(--line);
-      color: var(--text-cool);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
       transition: all 0.2s ease;
 
       &:hover,
       &:focus {
-        border-color: var(--amber);
-        color: var(--amber-pale);
-        background: rgba(26, 35, 50, 0.8);
+        border-color: var(--teal);
+        color: var(--teal);
+        background: var(--card);
       }
 
       &:active {
-        transform: scale(0.97);
+        transform: scale(0.98);
       }
 
       &.ant-btn-disabled {
-        background: rgba(12, 15, 23, 0.6);
-        border-color: var(--line-faint);
-        color: var(--text-dim);
+        background: #f3f4f6;
+        border-color: var(--line);
+        color: var(--gray-faint);
 
         .anticon {
-          color: var(--text-dim);
+          color: var(--gray-faint);
         }
       }
 
       .anticon {
-        font-size: 18px;
-        color: var(--amber-bright); // 图标琥珀光点
+        font-size: 17px;
+        color: var(--teal); // 图标青绿点睛
       }
     }
   }
 
-  // —— 照片 / 视频预览：暗夜光片（琥珀相框 + 轻微上浮） ——
+  // —— 照片 / 视频预览：白底圆角卡片，无旋转无胶带 ——
   &-previews {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px 18px;
-    padding: 10px 2px 4px;
-    margin-bottom: 18px;
-    animation: quick-capture-rise 0.5s 0.1s ease both;
+    gap: 12px;
+    margin-bottom: 14px;
+    animation: quick-capture-rise 0.4s 0.08s ease both;
   }
 
   &-preview {
     position: relative;
-    width: 88px;
+    width: 84px;
     padding: 6px;
-    background: var(--panel);
-    border: 1px solid rgba(240, 198, 116, 0.3);
-    border-radius: 6px;
-    box-shadow:
-      0 0 16px rgba(232, 176, 75, 0.12),
-      0 6px 16px rgba(0, 0, 0, 0.5);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
     transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease;
-
-    // 伪随机倾斜：像散落的光片
-    &:nth-child(3n) {
-      transform: rotate(-2.4deg);
-    }
-    &:nth-child(3n + 1) {
-      transform: rotate(1.8deg);
-    }
-    &:nth-child(3n + 2) {
-      transform: rotate(-1.1deg);
-    }
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
 
     &:hover {
-      transform: rotate(0deg) translateY(-3px);
-      box-shadow:
-        0 0 24px rgba(232, 176, 75, 0.22),
-        0 10px 22px rgba(0, 0, 0, 0.55);
-    }
-
-    // 顶部琥珀光带：像照片上的一缕暖光
-    &::before {
-      content: "";
-      position: absolute;
-      top: -1px;
-      left: 12%;
-      right: 12%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, rgba(240, 198, 116, 0.6), transparent);
-      z-index: 1;
-      pointer-events: none;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(16, 24, 40, 0.1);
     }
 
     img,
     video {
       display: block;
       width: 100%;
-      height: 74px;
+      height: 72px;
       object-fit: cover;
-      border-radius: 3px;
-      background: #0a0d14;
+      border-radius: 9px;
     }
   }
 
-  // 删除：琥珀小圆点
+  // 删除：青绿小圆点
   &-remove {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    line-height: 22px;
+    top: -7px;
+    right: -7px;
+    width: 22px;
+    height: 22px;
+    line-height: 20px;
     text-align: center;
-    background: var(--amber);
-    color: var(--night);
+    background: var(--teal);
+    color: #fff;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.15);
     z-index: 2;
     transition: background 0.2s ease;
 
     &:hover {
-      background: var(--amber-bright);
+      background: var(--teal-deep);
     }
   }
 
-  // —— 语音 / 文本切换：两侧发光短丝线 ——
+  // —— 语音 / 文本切换：细线分隔文字 ——
   &-switch {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin: 4px auto 18px;
+    gap: 10px;
+    margin: 2px auto 14px;
     padding: 6px 4px;
     border: none;
     background: transparent;
     font-size: 13px;
-    letter-spacing: 0.08em;
-    color: var(--text-cool);
+    letter-spacing: 0.02em;
+    color: var(--gray);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: color 0.2s ease;
@@ -422,13 +366,13 @@
     &::before,
     &::after {
       content: "";
-      width: 26px;
+      width: 20px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      background: var(--line);
     }
 
     &:hover {
-      color: var(--amber-pale);
+      color: var(--teal);
     }
 
     &:disabled {
@@ -437,126 +381,123 @@
     }
   }
 
-  // —— 底部：AI（暗面板描边）+ 保存（琥珀实底）同排 1:3 ——
+  // —— 底部：AI（白底描边）+ 保存（青绿实底）同排 1:3 ——
   &-footer {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 22px;
-    animation: quick-capture-rise 0.5s 0.14s ease both;
+    gap: 8px;
+    margin-top: 16px;
+    animation: quick-capture-rise 0.4s 0.1s ease both;
   }
 
   &-save-row {
     display: flex;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
-  // AI 按钮：暗面板 + 琥珀描边
+  // AI 按钮：白底细描边
   &-refine {
     position: relative;
     overflow: hidden;
     flex: 1;
-    height: 48px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
-    letter-spacing: 0.12em;
-    background: rgba(19, 26, 38, 0.75);
+    height: 42px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    background: var(--card);
     border: 1px solid var(--line);
-    color: var(--amber-pale);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      border-color: var(--amber-bright);
-      color: var(--amber-pale);
-      background: rgba(26, 35, 50, 0.85);
-      box-shadow: 0 0 18px rgba(232, 176, 75, 0.18);
+      border-color: var(--teal);
+      color: var(--teal);
+      background: var(--card);
     }
 
-    // 加载 / 保存中禁用：更深面板
+    // 加载 / 保存中禁用：灰化
     &.ant-btn-disabled,
     &[disabled] {
-      background: rgba(12, 15, 23, 0.7) !important;
-      border-color: var(--line-faint) !important;
-      color: var(--text-dim) !important;
+      background: #f3f4f6 !important;
+      border-color: var(--line) !important;
+      color: var(--gray-faint) !important;
       box-shadow: none;
     }
 
-    // 进度条：琥珀光带
+    // 进度条：青绿光带
     .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, var(--amber-bright), transparent);
+      background: linear-gradient(90deg, transparent, var(--teal), transparent);
     }
   }
 
-  // 保存：琥珀实底（深夜里的暖灯）
+  // 保存：青绿实底白字
   &-save {
     position: relative;
     overflow: hidden;
     flex: 3;
-    height: 48px;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 700;
-    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
-    letter-spacing: 0.16em;
-    background-color: var(--amber);
-    border-color: var(--amber);
-    color: var(--night);
-    box-shadow: 0 0 26px rgba(232, 176, 75, 0.35);
+    height: 42px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    background-color: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.28);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      background-color: var(--amber-bright);
-      border-color: var(--amber-bright);
-      box-shadow: 0 0 32px rgba(240, 198, 116, 0.5);
+      background-color: var(--teal-deep);
+      border-color: var(--teal-deep);
+      box-shadow: 0 6px 16px rgba(13, 148, 136, 0.32);
     }
 
     &:active {
-      transform: scale(0.97);
-      box-shadow: 0 0 18px rgba(232, 176, 75, 0.3);
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.24);
     }
 
-    // 加载 / 禁用中：保持琥珀底
+    // 加载 / 禁用中：保持青绿底
     &.ant-btn-disabled,
     &[disabled] {
-      background-color: var(--amber) !important;
-      border-color: var(--amber) !important;
-      color: rgba(12, 15, 23, 0.55) !important;
-      box-shadow: 0 0 26px rgba(232, 176, 75, 0.35);
+      background-color: var(--teal) !important;
+      border-color: var(--teal) !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.28);
     }
 
-    // 进度条：暖白亮光带
+    // 进度条：白亮光带
     .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, var(--amber-pale), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
     }
   }
 
-  // 进入 timeline：整行暗面板描边
+  // 进入 timeline：整行白底细描边
   &-enter {
     width: 100%;
-    height: 44px;
-    border-radius: 12px;
+    height: 40px;
+    border-radius: 14px;
     font-size: 14px;
-    letter-spacing: 0.12em;
-    color: var(--text-cool);
+    letter-spacing: 0.04em;
+    color: var(--gray);
     border-color: var(--line);
-    background: rgba(19, 26, 38, 0.45);
+    background: var(--card);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      color: var(--amber-pale);
-      border-color: var(--amber);
-      background: rgba(26, 35, 50, 0.6);
+      color: var(--teal);
+      border-color: var(--teal);
+      background: var(--card);
     }
 
     &:active {
-      background: rgba(240, 198, 116, 0.08);
+      background: #f3f4f6;
       transform: scale(0.99);
     }
   }
@@ -569,7 +510,7 @@
     bottom: 0;
     height: 3px;
     overflow: hidden;
-    border-radius: 0 0 11px 11px;
+    border-radius: 0 0 13px 13px;
     pointer-events: none;
 
     &::after {
@@ -585,11 +526,11 @@
   }
 }
 
-// 页面区块柔和入场
+// 页面区块柔和入场（克制）
 @keyframes quick-capture-rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -597,24 +538,20 @@
   }
 }
 
-// 录音呼吸：琥珀光晕扩散
+// 录音：克制的呼吸脉冲
 @keyframes quick-capture-rec {
   0%,
   100% {
     transform: scale(1);
-    box-shadow:
-      0 0 0 0 rgba(240, 198, 116, 0.45),
-      0 0 26px 6px rgba(232, 176, 75, 0.3);
+    box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.3);
   }
   50% {
-    transform: scale(1.05);
-    box-shadow:
-      0 0 0 20px rgba(240, 198, 116, 0),
-      0 0 44px 14px rgba(232, 176, 75, 0.55);
+    transform: scale(1.04);
+    box-shadow: 0 0 0 12px rgba(229, 72, 77, 0);
   }
 }
 
-// 光点闪烁（LED / 星点）
+// 录音指示灯闪烁
 @keyframes quick-capture-blink {
   0%,
   60% {
@@ -623,19 +560,6 @@
   61%,
   100% {
     opacity: 0.25;
-  }
-}
-
-// 标题星点微闪
-@keyframes quick-capture-twinkle {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 14px 4px rgba(240, 198, 116, 0.45);
-  }
-  50% {
-    opacity: 0.55;
-    box-shadow: 0 0 6px 2px rgba(240, 198, 116, 0.2);
   }
 }
 
