@@ -85,6 +85,30 @@
     &.is-active {
       opacity: 1;
     }
+
+    // iOS 假频谱：不读麦克风，纯 CSS 起伏动画（is-fake 由 isIOS 恒置）
+    // 动画优先级高于 inline transform，iOS 上 rAF 不写 style 也能正常动
+    &.is-fake .quick-capture-wave-bar {
+      animation: quick-capture-fake-wave 1.2s ease-in-out infinite alternate;
+    }
+
+    // nth-child 错开时长与延迟，形成错落频谱感
+    &.is-fake .quick-capture-wave-bar:nth-child(3n) {
+      animation-duration: 1.4s;
+      animation-delay: 0.1s;
+    }
+    &.is-fake .quick-capture-wave-bar:nth-child(3n + 1) {
+      animation-duration: 1s;
+      animation-delay: 0.25s;
+    }
+    &.is-fake .quick-capture-wave-bar:nth-child(3n + 2) {
+      animation-duration: 1.6s;
+      animation-delay: 0.05s;
+    }
+    &.is-fake .quick-capture-wave-bar:nth-child(even) {
+      animation-duration: 1.2s;
+      animation-delay: 0.15s;
+    }
   }
 
   // 频谱柱：珊瑚红圆头细柱，scaleY 从中心对称伸缩，静默留小柱
@@ -608,6 +632,16 @@
   61%,
   100% {
     opacity: 0.25;
+  }
+}
+
+// iOS 假频谱：柱子 0.15 ~ 1 往返起伏
+@keyframes quick-capture-fake-wave {
+  from {
+    transform: scaleY(0.15);
+  }
+  to {
+    transform: scaleY(1);
   }
 }
 

@@ -64,6 +64,12 @@ const QuickCapture = () => {
   const audioCtxRef = useRef(null);
   const rafRef = useRef(null);
 
+  // iOS 检测：iOS 上 getUserMedia 与语音识别共用麦克风会冲突，
+  // 因此 iOS 跳过真实采集，改用 CSS 假频谱动画
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   const fetchGeoAndWeather = () =>
     new Promise((resolve) => {
       if (!navigator.geolocation) return resolve({ geo: {}, weather: {} });
@@ -234,6 +240,7 @@ const QuickCapture = () => {
 
   // —— 声纹波纹：AudioContext + AnalyserNode + rAF，ref 直写 DOM ——
   const startWaveform = async () => {
+    if (isIOS) return; // iOS：跳过真实采集，避免与语音识别抢麦克风（用 CSS 假频谱）
     try {
       if (!navigator.mediaDevices?.getUserMedia) return; // 无能力则静默跳过
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -470,7 +477,7 @@ const QuickCapture = () => {
 
       {inputMode === "voice" ? (
         <div className="quick-capture-voice">
-          <div className={`quick-capture-wave${recording ? " is-active" : ""}`}>
+          <div className={`quick-capture-wave${recording ? " is-active" : ""}${isIOS ? " is-fake" : ""}`}>
             {[...Array(WAVE_BAR_COUNT)].map((_, i) => (
               <span
                 key={i}
