@@ -151,6 +151,14 @@ const QuickCapture = () => {
     });
   };
 
+  // 清空：只清录入的文字和照片，天气 / 定位保留
+  const handleClear = () => {
+    setContent("");
+    setFiles([]);
+    previews.forEach((p) => p.url && URL.revokeObjectURL(p.url));
+    setPreviews([]);
+  };
+
   const getSpeechRecognition = () =>
     typeof window !== "undefined"
       ? window.SpeechRecognition || window.webkitSpeechRecognition
@@ -163,51 +171,50 @@ const QuickCapture = () => {
       message.warning("当前浏览器不支持语音识别");
       return;
     }
-    if (!recognitionRef.current) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = "zh-CN";
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.onresult = (event) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const res = event.results[i];
-          if (res?.[0]?.transcript) transcript += res[0].transcript;
-        }
-        if (transcript) {
-          setContent((prev) => (prev ? `${prev}\n${transcript}` : transcript));
-        }
-      };
-      recognition.onerror = (event) => {
-        if (event.error === "not-allowed") {
-          message.error("请允许麦克风权限");
-        } else if (event.error === "no-speech" || event.error === "aborted") {
-          // 无语音 / 主动停止：静默
-        } else if (
-          event.error === "service-not-allowed" ||
-          event.error === "audio-capture"
-        ) {
-          message.warning("当前设备无可用语音引擎，已切换到文本输入");
-          setInputMode("text");
-        } else {
-          message.error("语音识别出错，请重试");
-        }
-      };
-      recognition.onend = () => {
-        setRecording(false);
-        recordingRef.current = false;
-        stopWaveform();
-      };
-      recognition.onstart = () => {
-        // 麦克风授权成功后才采集声纹波纹，避免与语音识别的权限弹窗重复
-        if (recordingRef.current) startWaveform();
-      };
-      recognitionRef.current = recognition;
-    }
+    // 每次录制都新建识别实例，避免复用同一实例导致二次录制失效
+    const recognition = new SpeechRecognition();
+    recognition.lang = "zh-CN";
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i];
+        if (res?.[0]?.transcript) transcript += res[0].transcript;
+      }
+      if (transcript) {
+        setContent((prev) => (prev ? `${prev}\n${transcript}` : transcript));
+      }
+    };
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed") {
+        message.error("请允许麦克风权限");
+      } else if (event.error === "no-speech" || event.error === "aborted") {
+        // 无语音 / 主动停止：静默
+      } else if (
+        event.error === "service-not-allowed" ||
+        event.error === "audio-capture"
+      ) {
+        message.warning("当前设备无可用语音引擎，已切换到文本输入");
+        setInputMode("text");
+      } else {
+        message.error("语音识别出错，请重试");
+      }
+    };
+    recognition.onend = () => {
+      setRecording(false);
+      recordingRef.current = false;
+      stopWaveform();
+    };
+    recognition.onstart = () => {
+      // 麦克风授权成功后才采集声纹波纹，避免与语音识别的权限弹窗重复
+      if (recordingRef.current) startWaveform();
+    };
+    recognitionRef.current = recognition;
     recordingRef.current = true;
     setRecording(true);
     try {
-      recognitionRef.current.start();
+      recognition.start();
     } catch (e) {
       console.warn("语音识别启动失败:", e);
       stopWaveform();
@@ -517,6 +524,12 @@ const QuickCapture = () => {
       <button className="quick-capture-switch" disabled={aiLoading} onClick={() => setInputMode((m) => (m === "voice" ? "text" : "voice"))}>
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
       </button>
+
+      {(content.trim() || files.length > 0) && (
+        <button className="quick-capture-clear" onClick={handleClear}>
+          清空
+        </button>
+      )}
 
       <div className="quick-capture-footer">
         <div className="quick-capture-save-row">

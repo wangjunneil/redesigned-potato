@@ -410,6 +410,25 @@
     }
   }
 
+  // 清空：轻量文字按钮，有内容时才显示
+  &-clear {
+    display: block;
+    margin: 0 auto 14px;
+    padding: 4px 12px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--gray-faint);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--teal);
+    }
+  }
+
   // —— 底部：AI（白底描边）+ 保存（青绿实底）同排 1:3 ——
   &-footer {
     display: flex;
