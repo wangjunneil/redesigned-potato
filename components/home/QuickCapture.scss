@@ -1,219 +1,237 @@
-// 移动端快速录入页
-// 主题色：#1f2430（灰黑）→ 悬停 #333b4d，与时间线浮动按钮/保存按钮保持一致
-// 容器本身透明，透出 body 全局背景 url(/bg.webp)，与 timeline 页面一致
+// ============================================================
+// 移动端快速录入页 · 视觉重设计
+// 美学方向：私密手账 · 时间胶囊
+//   暖米白纸底（叠加 bg.webp）+ 墨色文字 + 朱砂红强调
+//   中文衬线（宋体正文 / 楷体标题），录音 REC 键、拍立得预览、
+//   噪点纸张纹理、克制的手账动效
+// 功能 100% 不变：仅重写样式，JSX / class 名 / 逻辑均未动
+// ============================================================
+
 .quick-capture {
+  // —— 手账色板 ——
+  --paper: #f6efe3; // 暖米白纸
+  --paper-light: #faf5ea; // 纸亮面
+  --paper-deep: #efe6d5; // 纸阴影
+  --ink: #2b2620; // 墨色
+  --ink-soft: #6b6153; // 次级墨色
+  --ink-faint: #a89c8a; // 弱化墨色
+  --cinnabar: #b5452f; // 朱砂红（录音 / 保存 / 强调）
+  --cinnabar-deep: #96382a; // 朱砂深（悬停）
+  --ochre: #8a6d3b; // 赭石（次级）
+  --line: rgba(43, 38, 32, 0.16); // 墨色描边
+  --paper-line: rgba(43, 38, 32, 0.08); // 纸内细线
+
   max-width: 480px;
   margin: 0 auto;
-  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  padding: 28px 16px calc(32px + env(safe-area-inset-bottom));
   min-height: 100dvh;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
-    "Microsoft YaHei", sans-serif;
+
+  // 纸张质感：噪点纤维 + 暖色光晕，半透明叠在 body 的 bg.webp 之上
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.4'/></svg>")
+      repeat,
+    radial-gradient(ellipse at 18% 4%, rgba(255, 252, 244, 0.7), transparent 55%),
+    radial-gradient(ellipse at 88% 96%, rgba(178, 142, 94, 0.18), transparent 60%),
+    linear-gradient(178deg, rgba(246, 239, 227, 0.88), rgba(240, 230, 212, 0.8));
+
+  // 宋体正文：书页的手感
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 
+  // —— 标题：楷体大题 + 朱砂印章 + 手绘虚线 ——
   &-title {
-    font-size: 26px;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    font-size: 30px;
     font-weight: 700;
     text-align: center;
-    margin: 8px 0 20px;
-    color: #1f2430;
-    letter-spacing: 0.02em;
+    margin: 6px 0 22px;
+    color: var(--ink);
+    letter-spacing: 0.14em; // 书写间距
     position: relative;
+    animation: quick-capture-rise 0.5s ease both;
 
-    // 标题下的小装饰线，与灰黑主题呼应
+    // 朱砂小印章
+    &::before {
+      content: "";
+      display: block;
+      width: 12px;
+      height: 12px;
+      margin: 0 auto 12px;
+      background: var(--cinnabar);
+      transform: rotate(8deg);
+      box-shadow: 0 1px 3px rgba(43, 38, 32, 0.25);
+    }
+
+    // 手绘虚线装饰
     &::after {
       content: "";
       display: block;
-      width: 28px;
+      width: 64px;
       height: 3px;
-      margin: 10px auto 0;
-      border-radius: 2px;
-      background: linear-gradient(90deg, #1f2430, #5b6478);
+      margin: 12px auto 0;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--ink) 0 5px,
+        transparent 5px 10px
+      );
+      opacity: 0.5;
     }
   }
 
-  // —— 语音输入（默认模式）——
+  // —— 语音输入（默认） ——
   &-voice {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 0 4px;
-    margin-bottom: 14px;
+    padding: 14px 0 6px;
+    margin-bottom: 16px;
+    animation: quick-capture-rise 0.5s 0.08s ease both;
   }
 
-  // 大号圆形麦克风，拇指按压友好
+  // —— 麦克风：老式录音机 REC 键 ——
   &-mic {
-    width: 88px;
-    height: 88px;
+    position: relative;
+    width: 92px;
+    height: 92px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1.5px solid #1f2430;
-    color: #1f2430;
-    font-size: 34px;
+    background: var(--paper-light);
+    border: 2px solid var(--cinnabar);
+    color: var(--cinnabar);
+    font-size: 36px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none; // 按住录音时阻止页面滚动
     -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 6px 16px rgba(31, 36, 48, 0.18);
-    transition:
-      background 0.2s ease,
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+    box-shadow: 0 6px 18px rgba(43, 38, 32, 0.14);
+    transition: all 0.25s ease;
 
     &:active {
-      transform: scale(0.96);
+      transform: scale(0.94);
     }
 
-    // 录制中：醒目红色 + 脉冲光晕
+    // REC 指示灯（录制时亮起）
+    &::after {
+      content: "";
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: transparent;
+      transition: background 0.2s ease;
+    }
+
+    // 录制中：朱砂实底 + 呼吸脉冲 + 指示灯闪烁
     &.is-recording {
-      background: #e5484d;
-      border-color: #e5484d;
+      background: var(--cinnabar);
+      border-color: var(--cinnabar);
       color: #fff;
-      animation: quick-capture-pulse 1.4s ease-out infinite;
+      animation: quick-capture-rec 1.3s ease-in-out infinite;
+
+      &::after {
+        background: #fff;
+        animation: quick-capture-blink 1s steps(1, end) infinite;
+      }
     }
 
-    // AI 润色中禁用：弱化、禁手势
+    // AI 润色中禁用
     &.is-disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
       box-shadow: none;
     }
   }
 
+  // 麦克风下方提示：楷体小字
   &-mic-hint {
-    margin-top: 12px;
-    font-size: 14px;
-    color: #4a5366;
+    margin-top: 14px;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
     transition: color 0.2s ease;
 
     &.is-recording {
-      color: #e5484d;
+      color: var(--cinnabar);
     }
   }
 
   &-voice-content {
     width: 100%;
-    margin-top: 16px;
+    margin-top: 18px;
   }
 
-  // 转写结果「回写」展示区
+  // 转写回写卡：暖纸 + 朱砂竖向分隔线
   &-voice-text {
     width: 100%;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 15px;
-    line-height: 1.7;
-    color: #23283a;
-    background: rgba(255, 255, 255, 0.88);
-    border: 1px solid #e2e5ea;
-    border-radius: 10px;
-    padding: 12px 14px;
-    max-height: 220px;
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--ink);
+    background: rgba(253, 249, 240, 0.92);
+    border: 1px solid var(--paper-line);
+    border-left: 3px solid rgba(181, 69, 47, 0.65); // 手账竖向线
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-height: 240px;
     overflow-y: auto;
-    box-shadow: 0 1px 4px rgba(31, 36, 48, 0.08);
+    box-shadow: 0 3px 10px rgba(43, 38, 32, 0.08);
+  }
+
+  &-voice-text::-webkit-scrollbar {
+    width: 4px;
+  }
+  &-voice-text::-webkit-scrollbar-thumb {
+    background: rgba(43, 38, 32, 0.2);
+    border-radius: 2px;
   }
 
   &-voice-placeholder {
     width: 100%;
-    font-size: 14px;
-    color: #a6adbb;
-    text-align: center;
-    padding: 22px 0;
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px dashed #d5d9e0;
-    border-radius: 10px;
-  }
-
-  // 语音 / 文本切换入口
-  &-switch {
-    display: block;
-    margin: 0 auto 16px;
-    padding: 4px 12px;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    color: #7a8398;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: #1f2430;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  // AI 按钮：与「保存」同行（flex 1 : 3），浅色描边风格、不喧宾夺主
-  &-refine {
-    position: relative;
-    overflow: hidden;
-    flex: 1;
-    height: 46px;
-    border-radius: 10px;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
     font-size: 15px;
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid #d9dde4;
-    color: #1f2430;
-    box-shadow: 0 1px 3px rgba(31, 36, 48, 0.1);
-    transition: all 0.2s ease;
-
-    &:hover,
-    &:focus {
-      border-color: #1f2430;
-      color: #1f2430;
-      background: #fff;
-    }
-
-    // 加载/保存中禁用：保持浅色底，仅弱化文字
-    &.ant-btn-disabled,
-    &[disabled] {
-      background: rgba(255, 255, 255, 0.85) !important;
-      border-color: #d9dde4 !important;
-      color: rgba(31, 36, 48, 0.45) !important;
-      box-shadow: none;
-    }
-
-    // 进度条颜色：浅底上用灰黑渐变
-    .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, #1f2430, transparent);
-    }
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    text-align: center;
+    padding: 26px 0;
+    background: rgba(253, 249, 240, 0.6);
+    border: 1px dashed rgba(43, 38, 32, 0.22);
+    border-radius: 12px;
   }
 
+  // —— 文本模式：EasyMDE 纸感化 ——
   .markdown-editor-wrapper {
     margin-bottom: 14px;
+    animation: quick-capture-rise 0.5s 0.08s ease both;
 
-    // —— EasyMDE 视觉融入 ——
     .EasyMDEContainer {
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(31, 36, 48, 0.08);
-      border-color: #e2e5ea;
+      box-shadow: 0 3px 10px rgba(43, 38, 32, 0.08);
+      border-color: var(--paper-line);
 
       .editor-toolbar {
         display: flex;
         flex-wrap: wrap;
         gap: 2px;
-        border-bottom: 1px solid #eceef2;
-        background: #fff;
+        border-bottom: 1px solid var(--paper-line);
+        background: var(--paper-light);
 
         button {
           border: none;
           margin: 0;
-          color: #4a5366;
+          color: var(--ink-soft);
           &:hover,
           &.active {
-            background: #f1f2f6;
-            color: #1f2430;
+            background: rgba(181, 69, 47, 0.1);
+            color: var(--cinnabar);
             border: none;
           }
         }
@@ -221,14 +239,16 @@
 
       .CodeMirror {
         font-size: 16px; // 移动端字号，避免 iOS 聚焦缩放
-        line-height: 1.6;
-        color: #23283a;
+        line-height: 1.85;
+        font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+        color: var(--ink);
         min-height: 120px;
         border-radius: 0;
+        background: rgba(253, 249, 240, 0.92);
       }
 
       .CodeMirror-placeholder {
-        color: #a6adbb;
+        color: var(--ink-faint);
       }
 
       .editor-preview,
@@ -238,103 +258,296 @@
     }
   }
 
+  // —— 拍照 / 从相册选：纸片按钮 ——
   &-actions {
     display: flex;
     gap: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
+    animation: quick-capture-rise 0.5s 0.06s ease both;
 
-    // 拍照 / 从相册选：白底描边，与「保存」的灰黑实底形成层次
     .ant-btn {
       flex: 1;
-      height: 44px;
-      border-radius: 10px;
+      height: 46px;
+      border-radius: 12px;
       font-size: 15px;
-      background: #fff;
-      border: 1px solid #d9dde4;
-      color: #1f2430;
+      font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+      letter-spacing: 0.06em;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(43, 38, 32, 0.08);
       transition: all 0.2s ease;
 
-      &:hover {
-        border-color: #1f2430;
-        color: #1f2430;
-        background: #fff;
+      &:hover,
+      &:focus {
+        border-color: var(--cinnabar);
+        color: var(--cinnabar);
+        background: var(--paper-light);
       }
 
       &:active {
-        background: #f1f2f6;
-        transform: scale(0.98);
+        transform: scale(0.97);
       }
 
-      // AI 润色中禁用：柔和降级
       &.ant-btn-disabled {
-        background: rgba(255, 255, 255, 0.6);
-        border-color: #e5e8ee;
-        color: #a6adbb;
+        background: rgba(246, 239, 227, 0.6);
+        border-color: var(--paper-line);
+        color: var(--ink-faint);
+
+        .anticon {
+          color: var(--ink-faint);
+        }
       }
 
       .anticon {
-        font-size: 17px;
+        font-size: 18px;
+        color: var(--cinnabar); // 图标朱砂点睛
       }
     }
   }
 
+  // —— 照片 / 视频预览：拍立得（随机旋转 + 纸胶带） ——
   &-previews {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 16px 18px;
+    padding: 10px 2px 4px; // 顶部给胶带留位
+    margin-bottom: 18px;
+    animation: quick-capture-rise 0.5s 0.1s ease both;
   }
 
   &-preview {
     position: relative;
-    width: 76px;
-    height: 76px;
+    width: 88px;
+    padding: 6px 6px 18px; // 白边 + 拍立得底部留白
+    background: #fdf9ef;
+    border-radius: 3px;
+    box-shadow: 0 5px 12px rgba(43, 38, 32, 0.18);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+
+    // 伪随机倾斜：像随手贴上的照片
+    &:nth-child(3n) {
+      transform: rotate(-2.6deg);
+    }
+    &:nth-child(3n + 1) {
+      transform: rotate(1.9deg);
+    }
+    &:nth-child(3n + 2) {
+      transform: rotate(-1.2deg);
+    }
+
+    &:hover {
+      transform: rotate(0deg) translateY(-2px);
+      box-shadow: 0 8px 16px rgba(43, 38, 32, 0.22);
+    }
+
+    // 泛黄纸胶带
+    &::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 46px;
+      height: 15px;
+      margin-left: -23px;
+      background: rgba(226, 197, 142, 0.9);
+      box-shadow: 0 1px 3px rgba(43, 38, 32, 0.12);
+      transform: rotate(-2deg);
+      z-index: 1;
+    }
 
     img,
     video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(31, 36, 48, 0.15);
       display: block;
+      width: 100%;
+      height: 68px;
+      object-fit: cover;
+      border-radius: 1px;
     }
   }
 
+  // 删除：朱砂小圆章
   &-remove {
     position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 22px;
-    height: 22px;
-    line-height: 20px;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    line-height: 22px;
     text-align: center;
-    background: rgba(31, 36, 48, 0.75);
+    background: var(--cinnabar);
     color: #fff;
     border-radius: 50%;
     cursor: pointer;
     font-size: 15px;
-    border: 1.5px solid #fff;
-    box-sizing: border-box;
+    box-shadow: 0 2px 6px rgba(43, 38, 32, 0.3);
+    z-index: 2;
     transition: background 0.2s ease;
 
     &:hover {
-      background: #1f2430;
+      background: var(--cinnabar-deep);
     }
   }
 
+  // —— 语音 / 文本切换：两侧虚线装饰 ——
+  &-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 4px auto 18px;
+    padding: 6px 4px;
+    border: none;
+    background: transparent;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease;
+
+    &::before,
+    &::after {
+      content: "";
+      width: 26px;
+      height: 1px;
+      background: var(--line);
+    }
+
+    &:hover {
+      color: var(--cinnabar);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // —— 底部：AI（墨描边）+ 保存（朱砂实底）同排 1:3 ——
   &-footer {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 24px;
+    margin-top: 22px;
+    animation: quick-capture-rise 0.5s 0.14s ease both;
   }
 
-  // 保存行：AI 按钮 1/4 + 保存按钮 3/4 同行
   &-save-row {
     display: flex;
     align-items: stretch;
-    gap: 8px;
+    gap: 10px;
+  }
+
+  // AI 按钮：暖纸 + 墨色描边
+  &-refine {
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    letter-spacing: 0.1em;
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(43, 38, 32, 0.08);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      border-color: var(--cinnabar);
+      color: var(--cinnabar);
+      background: var(--paper-light);
+    }
+
+    // 加载 / 保存中禁用：保持纸色，仅弱化
+    &.ant-btn-disabled,
+    &[disabled] {
+      background: var(--paper-light) !important;
+      border-color: var(--paper-line) !important;
+      color: var(--ink-faint) !important;
+      box-shadow: none;
+    }
+
+    // 进度条：朱砂光带
+    .quick-capture-progress::after {
+      background: linear-gradient(90deg, transparent, var(--cinnabar), transparent);
+    }
+  }
+
+  // 保存：朱砂实底（盖章感）
+  &-save {
+    position: relative;
+    overflow: hidden;
+    flex: 3;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    letter-spacing: 0.16em;
+    background-color: var(--cinnabar);
+    border-color: var(--cinnabar);
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(181, 69, 47, 0.3);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      background-color: var(--cinnabar-deep);
+      border-color: var(--cinnabar-deep);
+    }
+
+    &:active {
+      transform: scale(0.97);
+      box-shadow: 0 3px 8px rgba(181, 69, 47, 0.25);
+    }
+
+    // 加载 / 禁用中：保持朱砂底
+    &.ant-btn-disabled,
+    &[disabled] {
+      background-color: var(--cinnabar) !important;
+      border-color: var(--cinnabar) !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+      box-shadow: 0 5px 14px rgba(181, 69, 47, 0.3);
+    }
+
+    // 进度条：暖米金光带
+    .quick-capture-progress::after {
+      background: linear-gradient(90deg, transparent, #f5e3bd, transparent);
+    }
+  }
+
+  // 进入 timeline：整行墨色描边
+  &-enter {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    border-color: var(--line);
+    background: transparent;
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus {
+      color: var(--cinnabar);
+      border-color: var(--cinnabar);
+      background: rgba(181, 69, 47, 0.05);
+    }
+
+    &:active {
+      background: rgba(181, 69, 47, 0.1);
+      transform: scale(0.99);
+    }
   }
 
   // 不确定进度条：按钮底部细条，左 → 右循环扫动
@@ -345,7 +558,7 @@
     bottom: 0;
     height: 3px;
     overflow: hidden;
-    border-radius: 0 0 9px 9px;
+    border-radius: 0 0 11px 11px;
     pointer-events: none;
 
     &::after {
@@ -359,82 +572,42 @@
       animation: quick-capture-indeterminate 1.1s ease-in-out infinite;
     }
   }
+}
 
-  // 保存：灰黑实底，悬停 #333b4d，与时间线主按钮统一
-  &-save {
-    position: relative;
-    overflow: hidden;
-    flex: 3;
-    height: 46px;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    background-color: #1f2430;
-    border-color: #1f2430;
-    box-shadow: 0 4px 12px rgba(31, 36, 48, 0.25);
-    transition: all 0.2s ease;
-
-    &:hover,
-    &:focus {
-      background-color: #333b4d;
-      border-color: #333b4d;
-    }
-
-    &:active {
-      transform: scale(0.98);
-      box-shadow: 0 2px 6px rgba(31, 36, 48, 0.2);
-    }
-
-    // 加载/禁用中：保持灰黑底，仅弱化文字
-    &.ant-btn-disabled,
-    &[disabled] {
-      background-color: #1f2430 !important;
-      border-color: #1f2430 !important;
-      color: rgba(255, 255, 255, 0.6) !important;
-      box-shadow: 0 4px 12px rgba(31, 36, 48, 0.25);
-    }
-
-    // 进度条颜色：深底上用白色渐变
-    .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, #ffffff, transparent);
-    }
+// 页面区块柔和入场
+@keyframes quick-capture-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
-
-  &-enter {
-    width: 100%;
-    height: 42px;
-    border-radius: 10px;
-    font-size: 15px;
-    color: #4a5366;
-    border-color: #d9dde4;
-    background: transparent;
-    transition: all 0.2s ease;
-
-    &:hover,
-    &:focus {
-      color: #1f2430;
-      border-color: #1f2430;
-      background: rgba(31, 36, 48, 0.04);
-    }
-
-    &:active {
-      background: rgba(31, 36, 48, 0.08);
-      transform: scale(0.99);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// 录制中麦克风的脉冲光晕
-@keyframes quick-capture-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.45);
-  }
-  70% {
-    box-shadow: 0 0 0 20px rgba(229, 72, 77, 0);
-  }
+// 录音呼吸脉冲
+@keyframes quick-capture-rec {
+  0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(229, 72, 77, 0);
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(181, 69, 47, 0.38);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 18px rgba(181, 69, 47, 0);
+  }
+}
+
+// REC 指示灯闪烁
+@keyframes quick-capture-blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.2;
   }
 }
 
@@ -450,4 +623,3 @@
     transform: translateX(220%);
   }
 }
-
