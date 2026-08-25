@@ -1,81 +1,82 @@
 // ============================================================
-// 移动端快速录入页 · 视觉重设计
-// 美学方向：私密手账 · 时间胶囊
-//   暖米白纸底（叠加 bg.webp）+ 墨色文字 + 朱砂红强调
-//   中文衬线（宋体正文 / 楷体标题），录音 REC 键、拍立得预览、
-//   噪点纸张纹理、克制的手账动效
+// 移动端快速录入页 · 视觉重设计（深色版）
+// 美学方向：深夜时间胶囊
+//   深夜深空底（不透明，盖住 bg.webp）+ 琥珀暖光 + 冷灰文字
+//   标题衬线（Noto Serif SC / Songti SC），正文等宽（记录舱日志感）
+//   发光光点麦克风、光片相框预览、星云噪点背景、星点微闪
 // 功能 100% 不变：仅重写样式，JSX / class 名 / 逻辑均未动
 // ============================================================
 
 .quick-capture {
-  // —— 手账色板 ——
-  --paper: #f6efe3; // 暖米白纸
-  --paper-light: #faf5ea; // 纸亮面
-  --paper-deep: #efe6d5; // 纸阴影
-  --ink: #2b2620; // 墨色
-  --ink-soft: #6b6153; // 次级墨色
-  --ink-faint: #a89c8a; // 弱化墨色
-  --cinnabar: #b5452f; // 朱砂红（录音 / 保存 / 强调）
-  --cinnabar-deep: #96382a; // 朱砂深（悬停）
-  --ochre: #8a6d3b; // 赭石（次级）
-  --line: rgba(43, 38, 32, 0.16); // 墨色描边
-  --paper-line: rgba(43, 38, 32, 0.08); // 纸内细线
+  // —— 深夜色板 ——
+  --night: #0c0f17; // 近黑深空底
+  --night-deep: #0a0d14; // 更深处
+  --panel: #131a26; // 面板深蓝灰
+  --panel-light: #1a2332; // 面板亮面
+  --amber: #e8b04b; // 琥珀暖光
+  --amber-bright: #f0c674; // 亮琥珀
+  --amber-pale: #f5d7a1; // 浅琥珀（文字强调）
+  --text-warm: #e6e1d5; // 暖白文字
+  --text-cool: #8a93a3; // 次级冷灰
+  --text-dim: #5a6474; // 弱化文字
+  --line: rgba(240, 198, 116, 0.25); // 琥珀半透明描边
+  --line-faint: rgba(240, 198, 116, 0.12); // 更弱描边
 
   max-width: 480px;
   margin: 0 auto;
   padding: 28px 16px calc(32px + env(safe-area-inset-bottom));
   min-height: 100dvh;
 
-  // 纸张质感：噪点纤维 + 暖色光晕，半透明叠在 body 的 bg.webp 之上
+  // 深夜太空背景：星尘噪点 + 星云深蓝 + 底部琥珀余晖 + 暗角
+  // 容器不透明，完全盖住 body 的 bg.webp
   background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.4'/></svg>")
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>")
       repeat,
-    radial-gradient(ellipse at 18% 4%, rgba(255, 252, 244, 0.7), transparent 55%),
-    radial-gradient(ellipse at 88% 96%, rgba(178, 142, 94, 0.18), transparent 60%),
-    linear-gradient(178deg, rgba(246, 239, 227, 0.88), rgba(240, 230, 212, 0.8));
+    radial-gradient(ellipse at 50% 110%, rgba(232, 176, 75, 0.1), transparent 55%),
+    radial-gradient(ellipse at 15% -5%, rgba(58, 82, 130, 0.4), transparent 55%),
+    radial-gradient(ellipse at center, transparent 60%, rgba(5, 7, 12, 0.5) 100%),
+    linear-gradient(180deg, #0c0f17 0%, #101726 55%, #0a0d14 100%);
 
-  // 宋体正文：书页的手感
-  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
-  color: var(--ink);
+  // 等宽正文：记录舱日志感
+  font-family: "SF Mono", ui-monospace, "Menlo", "Consolas", "PingFang SC", monospace;
+  color: var(--text-warm);
   -webkit-font-smoothing: antialiased;
 
-  // —— 标题：楷体大题 + 朱砂印章 + 手绘虚线 ——
+  // —— 标题：衬线大题 + 发光光点 + 琥珀细线 ——
   &-title {
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
     font-size: 30px;
     font-weight: 700;
     text-align: center;
     margin: 6px 0 22px;
-    color: var(--ink);
-    letter-spacing: 0.14em; // 书写间距
+    color: var(--amber-pale);
+    letter-spacing: 0.18em; // 太空感标题间距
+    text-shadow: 0 0 24px rgba(240, 198, 116, 0.25);
     position: relative;
     animation: quick-capture-rise 0.5s ease both;
 
-    // 朱砂小印章
+    // 星点光点：像在封存一枚星光
     &::before {
       content: "";
       display: block;
-      width: 12px;
-      height: 12px;
-      margin: 0 auto 12px;
-      background: var(--cinnabar);
-      transform: rotate(8deg);
-      box-shadow: 0 1px 3px rgba(43, 38, 32, 0.25);
+      width: 10px;
+      height: 10px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--amber-bright);
+      box-shadow: 0 0 14px 4px rgba(240, 198, 116, 0.45);
+      animation: quick-capture-twinkle 2.4s ease-in-out infinite;
     }
 
-    // 手绘虚线装饰
+    // 琥珀发光细线
     &::after {
       content: "";
       display: block;
-      width: 64px;
-      height: 3px;
-      margin: 12px auto 0;
-      background: repeating-linear-gradient(
-        90deg,
-        var(--ink) 0 5px,
-        transparent 5px 10px
-      );
-      opacity: 0.5;
+      width: 72px;
+      height: 2px;
+      margin: 14px auto 0;
+      background: linear-gradient(90deg, transparent, var(--amber), transparent);
+      box-shadow: 0 0 10px rgba(240, 198, 116, 0.4);
     }
   }
 
@@ -89,7 +90,7 @@
     animation: quick-capture-rise 0.5s 0.08s ease both;
   }
 
-  // —— 麦克风：老式录音机 REC 键 ——
+  // —— 麦克风：会发光的胶囊光点 ——
   &-mic {
     position: relative;
     width: 92px;
@@ -98,23 +99,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--paper-light);
-    border: 2px solid var(--cinnabar);
-    color: var(--cinnabar);
+    background: rgba(19, 26, 38, 0.85);
+    border: 2px solid rgba(240, 198, 116, 0.55);
+    color: var(--amber-bright);
     font-size: 36px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none; // 按住录音时阻止页面滚动
     -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 6px 18px rgba(43, 38, 32, 0.14);
+    box-shadow:
+      0 0 22px 4px rgba(232, 176, 75, 0.22),
+      0 8px 22px rgba(0, 0, 0, 0.5);
     transition: all 0.25s ease;
 
     &:active {
       transform: scale(0.94);
     }
 
-    // REC 指示灯（录制时亮起）
+    // 点亮的小光点（待命指示）
     &::after {
       content: "";
       position: absolute;
@@ -124,41 +127,45 @@
       height: 10px;
       border-radius: 50%;
       background: transparent;
-      transition: background 0.2s ease;
+      box-shadow: none;
+      transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
-    // 录制中：朱砂实底 + 呼吸脉冲 + 指示灯闪烁
+    // 录制中：琥珀实底「光片」+ 呼吸光晕扩散 + 光点亮起
     &.is-recording {
-      background: var(--cinnabar);
-      border-color: var(--cinnabar);
-      color: #fff;
+      background: var(--amber);
+      border-color: var(--amber-bright);
+      color: var(--night);
       animation: quick-capture-rec 1.3s ease-in-out infinite;
 
       &::after {
-        background: #fff;
+        background: var(--night);
+        box-shadow: 0 0 8px 2px rgba(12, 15, 23, 0.5);
         animation: quick-capture-blink 1s steps(1, end) infinite;
       }
     }
 
     // AI 润色中禁用
     &.is-disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
       box-shadow: none;
     }
   }
 
-  // 麦克风下方提示：楷体小字
+  // 麦克风下方提示：等宽小字
   &-mic-hint {
     margin-top: 14px;
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.08em;
-    color: var(--ink-soft);
+    color: var(--text-cool);
     transition: color 0.2s ease;
 
     &.is-recording {
-      color: var(--cinnabar);
+      color: var(--amber-pale);
+      text-shadow: 0 0 12px rgba(240, 198, 116, 0.4);
     }
   }
 
@@ -167,46 +174,47 @@
     margin-top: 18px;
   }
 
-  // 转写回写卡：暖纸 + 朱砂竖向分隔线
+  // 转写回写卡：记录舱日志面板
   &-voice-text {
     width: 100%;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.85;
-    color: var(--ink);
-    background: rgba(253, 249, 240, 0.92);
-    border: 1px solid var(--paper-line);
-    border-left: 3px solid rgba(181, 69, 47, 0.65); // 手账竖向线
+    color: var(--text-warm);
+    background: rgba(19, 26, 38, 0.88);
+    border: 1px solid var(--line-faint);
+    border-left: 3px solid rgba(240, 198, 116, 0.55); // 琥珀侧光条
     border-radius: 12px;
     padding: 14px 16px;
     max-height: 240px;
     overflow-y: auto;
-    box-shadow: 0 3px 10px rgba(43, 38, 32, 0.08);
+    box-shadow:
+      0 0 0 1px rgba(240, 198, 116, 0.04) inset,
+      0 4px 18px rgba(0, 0, 0, 0.4);
   }
 
   &-voice-text::-webkit-scrollbar {
     width: 4px;
   }
   &-voice-text::-webkit-scrollbar-thumb {
-    background: rgba(43, 38, 32, 0.2);
+    background: rgba(240, 198, 116, 0.25);
     border-radius: 2px;
   }
 
   &-voice-placeholder {
     width: 100%;
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.04em;
-    color: var(--ink-faint);
+    color: var(--text-dim);
     text-align: center;
     padding: 26px 0;
-    background: rgba(253, 249, 240, 0.6);
-    border: 1px dashed rgba(43, 38, 32, 0.22);
+    background: rgba(19, 26, 38, 0.55);
+    border: 1px dashed var(--line);
     border-radius: 12px;
   }
 
-  // —— 文本模式：EasyMDE 纸感化 ——
+  // —— 文本模式：EasyMDE 暗色化 ——
   .markdown-editor-wrapper {
     margin-bottom: 14px;
     animation: quick-capture-rise 0.5s 0.08s ease both;
@@ -214,24 +222,24 @@
     .EasyMDEContainer {
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 3px 10px rgba(43, 38, 32, 0.08);
-      border-color: var(--paper-line);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+      border-color: var(--line-faint);
 
       .editor-toolbar {
         display: flex;
         flex-wrap: wrap;
         gap: 2px;
-        border-bottom: 1px solid var(--paper-line);
-        background: var(--paper-light);
+        border-bottom: 1px solid var(--line-faint);
+        background: var(--panel-light);
 
         button {
           border: none;
           margin: 0;
-          color: var(--ink-soft);
+          color: var(--text-cool);
           &:hover,
           &.active {
-            background: rgba(181, 69, 47, 0.1);
-            color: var(--cinnabar);
+            background: rgba(240, 198, 116, 0.12);
+            color: var(--amber-bright);
             border: none;
           }
         }
@@ -240,15 +248,15 @@
       .CodeMirror {
         font-size: 16px; // 移动端字号，避免 iOS 聚焦缩放
         line-height: 1.85;
-        font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
-        color: var(--ink);
+        font-family: "SF Mono", ui-monospace, "Menlo", "Consolas", "PingFang SC", monospace;
+        color: var(--text-warm);
         min-height: 120px;
         border-radius: 0;
-        background: rgba(253, 249, 240, 0.92);
+        background: rgba(19, 26, 38, 0.9);
       }
 
       .CodeMirror-placeholder {
-        color: var(--ink-faint);
+        color: var(--text-dim);
       }
 
       .editor-preview,
@@ -258,7 +266,7 @@
     }
   }
 
-  // —— 拍照 / 从相册选：纸片按钮 ——
+  // —— 拍照 / 从相册选：暗夜面板按钮 ——
   &-actions {
     display: flex;
     gap: 10px;
@@ -269,20 +277,19 @@
       flex: 1;
       height: 46px;
       border-radius: 12px;
-      font-size: 15px;
-      font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+      font-size: 14px;
       letter-spacing: 0.06em;
-      background: var(--paper-light);
+      background: rgba(19, 26, 38, 0.7);
       border: 1px solid var(--line);
-      color: var(--ink);
-      box-shadow: 0 2px 6px rgba(43, 38, 32, 0.08);
+      color: var(--text-cool);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       transition: all 0.2s ease;
 
       &:hover,
       &:focus {
-        border-color: var(--cinnabar);
-        color: var(--cinnabar);
-        background: var(--paper-light);
+        border-color: var(--amber);
+        color: var(--amber-pale);
+        background: rgba(26, 35, 50, 0.8);
       }
 
       &:active {
@@ -290,28 +297,28 @@
       }
 
       &.ant-btn-disabled {
-        background: rgba(246, 239, 227, 0.6);
-        border-color: var(--paper-line);
-        color: var(--ink-faint);
+        background: rgba(12, 15, 23, 0.6);
+        border-color: var(--line-faint);
+        color: var(--text-dim);
 
         .anticon {
-          color: var(--ink-faint);
+          color: var(--text-dim);
         }
       }
 
       .anticon {
         font-size: 18px;
-        color: var(--cinnabar); // 图标朱砂点睛
+        color: var(--amber-bright); // 图标琥珀光点
       }
     }
   }
 
-  // —— 照片 / 视频预览：拍立得（随机旋转 + 纸胶带） ——
+  // —— 照片 / 视频预览：暗夜光片（琥珀相框 + 轻微上浮） ——
   &-previews {
     display: flex;
     flex-wrap: wrap;
     gap: 16px 18px;
-    padding: 10px 2px 4px; // 顶部给胶带留位
+    padding: 10px 2px 4px;
     margin-bottom: 18px;
     animation: quick-capture-rise 0.5s 0.1s ease both;
   }
@@ -319,56 +326,60 @@
   &-preview {
     position: relative;
     width: 88px;
-    padding: 6px 6px 18px; // 白边 + 拍立得底部留白
-    background: #fdf9ef;
-    border-radius: 3px;
-    box-shadow: 0 5px 12px rgba(43, 38, 32, 0.18);
+    padding: 6px;
+    background: var(--panel);
+    border: 1px solid rgba(240, 198, 116, 0.3);
+    border-radius: 6px;
+    box-shadow:
+      0 0 16px rgba(232, 176, 75, 0.12),
+      0 6px 16px rgba(0, 0, 0, 0.5);
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease;
 
-    // 伪随机倾斜：像随手贴上的照片
+    // 伪随机倾斜：像散落的光片
     &:nth-child(3n) {
-      transform: rotate(-2.6deg);
+      transform: rotate(-2.4deg);
     }
     &:nth-child(3n + 1) {
-      transform: rotate(1.9deg);
+      transform: rotate(1.8deg);
     }
     &:nth-child(3n + 2) {
-      transform: rotate(-1.2deg);
+      transform: rotate(-1.1deg);
     }
 
     &:hover {
-      transform: rotate(0deg) translateY(-2px);
-      box-shadow: 0 8px 16px rgba(43, 38, 32, 0.22);
+      transform: rotate(0deg) translateY(-3px);
+      box-shadow:
+        0 0 24px rgba(232, 176, 75, 0.22),
+        0 10px 22px rgba(0, 0, 0, 0.55);
     }
 
-    // 泛黄纸胶带
+    // 顶部琥珀光带：像照片上的一缕暖光
     &::before {
       content: "";
       position: absolute;
-      top: -8px;
-      left: 50%;
-      width: 46px;
-      height: 15px;
-      margin-left: -23px;
-      background: rgba(226, 197, 142, 0.9);
-      box-shadow: 0 1px 3px rgba(43, 38, 32, 0.12);
-      transform: rotate(-2deg);
+      top: -1px;
+      left: 12%;
+      right: 12%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(240, 198, 116, 0.6), transparent);
       z-index: 1;
+      pointer-events: none;
     }
 
     img,
     video {
       display: block;
       width: 100%;
-      height: 68px;
+      height: 74px;
       object-fit: cover;
-      border-radius: 1px;
+      border-radius: 3px;
+      background: #0a0d14;
     }
   }
 
-  // 删除：朱砂小圆章
+  // 删除：琥珀小圆点
   &-remove {
     position: absolute;
     top: -8px;
@@ -377,21 +388,21 @@
     height: 24px;
     line-height: 22px;
     text-align: center;
-    background: var(--cinnabar);
-    color: #fff;
+    background: var(--amber);
+    color: var(--night);
     border-radius: 50%;
     cursor: pointer;
     font-size: 15px;
-    box-shadow: 0 2px 6px rgba(43, 38, 32, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     z-index: 2;
     transition: background 0.2s ease;
 
     &:hover {
-      background: var(--cinnabar-deep);
+      background: var(--amber-bright);
     }
   }
 
-  // —— 语音 / 文本切换：两侧虚线装饰 ——
+  // —— 语音 / 文本切换：两侧发光短丝线 ——
   &-switch {
     display: flex;
     align-items: center;
@@ -401,10 +412,9 @@
     padding: 6px 4px;
     border: none;
     background: transparent;
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
-    font-size: 14px;
-    letter-spacing: 0.06em;
-    color: var(--ink-soft);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--text-cool);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: color 0.2s ease;
@@ -414,20 +424,20 @@
       content: "";
       width: 26px;
       height: 1px;
-      background: var(--line);
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
     }
 
     &:hover {
-      color: var(--cinnabar);
+      color: var(--amber-pale);
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
     }
   }
 
-  // —— 底部：AI（墨描边）+ 保存（朱砂实底）同排 1:3 ——
+  // —— 底部：AI（暗面板描边）+ 保存（琥珀实底）同排 1:3 ——
   &-footer {
     display: flex;
     flex-direction: column;
@@ -442,7 +452,7 @@
     gap: 10px;
   }
 
-  // AI 按钮：暖纸 + 墨色描边
+  // AI 按钮：暗面板 + 琥珀描边
   &-refine {
     position: relative;
     overflow: hidden;
@@ -451,37 +461,38 @@
     border-radius: 12px;
     font-size: 16px;
     font-weight: 700;
-    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
-    letter-spacing: 0.1em;
-    background: var(--paper-light);
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+    letter-spacing: 0.12em;
+    background: rgba(19, 26, 38, 0.75);
     border: 1px solid var(--line);
-    color: var(--ink);
-    box-shadow: 0 2px 6px rgba(43, 38, 32, 0.08);
+    color: var(--amber-pale);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      border-color: var(--cinnabar);
-      color: var(--cinnabar);
-      background: var(--paper-light);
+      border-color: var(--amber-bright);
+      color: var(--amber-pale);
+      background: rgba(26, 35, 50, 0.85);
+      box-shadow: 0 0 18px rgba(232, 176, 75, 0.18);
     }
 
-    // 加载 / 保存中禁用：保持纸色，仅弱化
+    // 加载 / 保存中禁用：更深面板
     &.ant-btn-disabled,
     &[disabled] {
-      background: var(--paper-light) !important;
-      border-color: var(--paper-line) !important;
-      color: var(--ink-faint) !important;
+      background: rgba(12, 15, 23, 0.7) !important;
+      border-color: var(--line-faint) !important;
+      color: var(--text-dim) !important;
       box-shadow: none;
     }
 
-    // 进度条：朱砂光带
+    // 进度条：琥珀光带
     .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, var(--cinnabar), transparent);
+      background: linear-gradient(90deg, transparent, var(--amber-bright), transparent);
     }
   }
 
-  // 保存：朱砂实底（盖章感）
+  // 保存：琥珀实底（深夜里的暖灯）
   &-save {
     position: relative;
     overflow: hidden;
@@ -490,62 +501,62 @@
     border-radius: 12px;
     font-size: 17px;
     font-weight: 700;
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
     letter-spacing: 0.16em;
-    background-color: var(--cinnabar);
-    border-color: var(--cinnabar);
-    color: #fff;
-    box-shadow: 0 5px 14px rgba(181, 69, 47, 0.3);
+    background-color: var(--amber);
+    border-color: var(--amber);
+    color: var(--night);
+    box-shadow: 0 0 26px rgba(232, 176, 75, 0.35);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      background-color: var(--cinnabar-deep);
-      border-color: var(--cinnabar-deep);
+      background-color: var(--amber-bright);
+      border-color: var(--amber-bright);
+      box-shadow: 0 0 32px rgba(240, 198, 116, 0.5);
     }
 
     &:active {
       transform: scale(0.97);
-      box-shadow: 0 3px 8px rgba(181, 69, 47, 0.25);
+      box-shadow: 0 0 18px rgba(232, 176, 75, 0.3);
     }
 
-    // 加载 / 禁用中：保持朱砂底
+    // 加载 / 禁用中：保持琥珀底
     &.ant-btn-disabled,
     &[disabled] {
-      background-color: var(--cinnabar) !important;
-      border-color: var(--cinnabar) !important;
-      color: rgba(255, 255, 255, 0.7) !important;
-      box-shadow: 0 5px 14px rgba(181, 69, 47, 0.3);
+      background-color: var(--amber) !important;
+      border-color: var(--amber) !important;
+      color: rgba(12, 15, 23, 0.55) !important;
+      box-shadow: 0 0 26px rgba(232, 176, 75, 0.35);
     }
 
-    // 进度条：暖米金光带
+    // 进度条：暖白亮光带
     .quick-capture-progress::after {
-      background: linear-gradient(90deg, transparent, #f5e3bd, transparent);
+      background: linear-gradient(90deg, transparent, var(--amber-pale), transparent);
     }
   }
 
-  // 进入 timeline：整行墨色描边
+  // 进入 timeline：整行暗面板描边
   &-enter {
     width: 100%;
     height: 44px;
     border-radius: 12px;
-    font-size: 15px;
-    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
-    letter-spacing: 0.1em;
-    color: var(--ink-soft);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    color: var(--text-cool);
     border-color: var(--line);
-    background: transparent;
+    background: rgba(19, 26, 38, 0.45);
     transition: all 0.2s ease;
 
     &:hover,
     &:focus {
-      color: var(--cinnabar);
-      border-color: var(--cinnabar);
-      background: rgba(181, 69, 47, 0.05);
+      color: var(--amber-pale);
+      border-color: var(--amber);
+      background: rgba(26, 35, 50, 0.6);
     }
 
     &:active {
-      background: rgba(181, 69, 47, 0.1);
+      background: rgba(240, 198, 116, 0.08);
       transform: scale(0.99);
     }
   }
@@ -586,20 +597,24 @@
   }
 }
 
-// 录音呼吸脉冲
+// 录音呼吸：琥珀光晕扩散
 @keyframes quick-capture-rec {
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(181, 69, 47, 0.38);
+    box-shadow:
+      0 0 0 0 rgba(240, 198, 116, 0.45),
+      0 0 26px 6px rgba(232, 176, 75, 0.3);
   }
   50% {
-    transform: scale(1.06);
-    box-shadow: 0 0 0 18px rgba(181, 69, 47, 0);
+    transform: scale(1.05);
+    box-shadow:
+      0 0 0 20px rgba(240, 198, 116, 0),
+      0 0 44px 14px rgba(232, 176, 75, 0.55);
   }
 }
 
-// REC 指示灯闪烁
+// 光点闪烁（LED / 星点）
 @keyframes quick-capture-blink {
   0%,
   60% {
@@ -607,7 +622,20 @@
   }
   61%,
   100% {
-    opacity: 0.2;
+    opacity: 0.25;
+  }
+}
+
+// 标题星点微闪
+@keyframes quick-capture-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 14px 4px rgba(240, 198, 116, 0.45);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 6px 2px rgba(240, 198, 116, 0.2);
   }
 }
 
