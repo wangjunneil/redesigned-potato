@@ -37,6 +37,9 @@ const mdeOptions = {
   hideIcons: ["side-by-side", "fullscreen"],
 };
 
+// 频谱柱数量：JSX 渲染与采样逻辑共用，避免对不上
+const WAVE_BAR_COUNT = 26;
+
 const QuickCapture = () => {
   const router = useRouter();
   const [content, setContent] = useState("");
@@ -236,7 +239,7 @@ const QuickCapture = () => {
       if (ctx.state === "suspended") ctx.resume().catch(() => {});
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 512; // 频段更细，频谱更平滑
       analyser.smoothingTimeConstant = 0.8; // 起伏平滑
       source.connect(analyser);
       streamRef.current = stream;
@@ -254,17 +257,20 @@ const QuickCapture = () => {
     const bars = micBarsRef.current;
     if (!analyser || bars.length === 0) return;
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const n = bars.length;
     const tick = () => {
       const a = analyserRef.current;
       const bs = micBarsRef.current;
       if (!a || bs.length === 0) return;
       a.getByteFrequencyData(dataArray);
       const len = dataArray.length;
-      const step = len / (bs.length + 1);
-      // 每根柱子取不同频段，错落起伏；直接写 style.transform，不触发重渲染
+      // 对数间隔采样：低中频更密集，像真实频谱
+      // 每根柱子映射一个频段，直接写 style.transform，不触发重渲染
       for (let i = 0; i < bs.length; i++) {
-        const v = dataArray[Math.floor(step * (i + 1))] / 255;
-        const scale = Math.max(0.2, Math.min(1, v * 1.15 + 0.25));
+        const t = i / (n - 1);
+        const idx = Math.floor(Math.pow(t, 1.5) * (len - 1));
+        const v = dataArray[idx] / 255;
+        const scale = Math.max(0.08, Math.min(1, v));
         const el = bs[i];
         if (el) el.style.transform = `scaleY(${scale.toFixed(3)})`;
       }
@@ -288,7 +294,7 @@ const QuickCapture = () => {
     }
     analyserRef.current = null;
     micBarsRef.current.forEach((el) => {
-      if (el) el.style.transform = "scaleY(0.2)"; // 柱子复位
+      if (el) el.style.transform = "scaleY(0.08)"; // 柱子复位到静默小柱
     });
   };
 
@@ -458,7 +464,7 @@ const QuickCapture = () => {
       {inputMode === "voice" ? (
         <div className="quick-capture-voice">
           <div className={`quick-capture-wave${recording ? " is-active" : ""}`}>
-            {[0, 1, 2, 3, 4].map((i) => (
+            {[...Array(WAVE_BAR_COUNT)].map((_, i) => (
               <span
                 key={i}
                 ref={(el) => {
