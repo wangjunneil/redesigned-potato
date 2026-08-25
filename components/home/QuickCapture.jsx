@@ -198,13 +198,16 @@ const QuickCapture = () => {
         recordingRef.current = false;
         stopWaveform();
       };
+      recognition.onstart = () => {
+        // 麦克风授权成功后才采集声纹波纹，避免与语音识别的权限弹窗重复
+        if (recordingRef.current) startWaveform();
+      };
       recognitionRef.current = recognition;
     }
     recordingRef.current = true;
     setRecording(true);
     try {
       recognitionRef.current.start();
-      startWaveform();
     } catch (e) {
       console.warn("语音识别启动失败:", e);
       stopWaveform();
