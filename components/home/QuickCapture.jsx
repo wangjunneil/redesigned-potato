@@ -372,6 +372,10 @@ const QuickCapture = () => {
         setVideoFiles([]);
         setVideoPreviews([]);
         setVideoTimestamp("");
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.src = "";
+          videoPreviewRef.current.load();
+        }
       }
     } catch (e) {
       try {
@@ -438,22 +442,33 @@ const QuickCapture = () => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
-  // 视频只进 VIDEO tab 的独立状态
+  // 单视频覆盖：重新录制时替换旧视频，并 revoke 上一个预览 url
   const addVideoFile = (file) => {
-    setVideoFiles((prev) => [...prev, file]);
-    setVideoPreviews((prev) => [
-      ...prev,
-      { name: file.name, url: URL.createObjectURL(file), isVideo: true },
-    ]);
+    const old = videoPreviews[0];
+    if (old?.url) URL.revokeObjectURL(old.url);
+    const url = URL.createObjectURL(file);
+    setVideoFiles([file]);
+    setVideoPreviews([{ name: file.name, url, isVideo: true }]);
+    // 录制完成后在预览区回放（srcObject 已由 cleanup 清空）
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null;
+      videoPreviewRef.current.src = url;
+      videoPreviewRef.current.load();
+    }
   };
 
-  const removeVideoFile = (index) => {
-    setVideoFiles((prev) => prev.filter((_, i) => i !== index));
+  // 删除当前视频：清空预览区 src，回到占位态
+  const removeVideoFile = () => {
+    setVideoFiles([]);
     setVideoPreviews((prev) => {
-      const target = prev[index];
+      const target = prev[0];
       if (target?.url) URL.revokeObjectURL(target.url);
-      return prev.filter((_, i) => i !== index);
+      return [];
     });
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.src = "";
+      videoPreviewRef.current.load();
+    }
   };
 
   const cleanupVideoStream = () => {
@@ -478,6 +493,7 @@ const QuickCapture = () => {
       });
       videoStreamRef.current = stream;
       if (videoPreviewRef.current) {
+        videoPreviewRef.current.src = ""; // 清掉上次的回放，切到实时画面
         videoPreviewRef.current.srcObject = stream;
         videoPreviewRef.current.play().catch(() => {});
       }
@@ -710,11 +726,24 @@ const QuickCapture = () => {
       ) : (
         <div className="quick-capture-video">
           <div className="quick-capture-video-preview">
-            <video ref={videoPreviewRef} muted playsInline />
-            {!videoRecording && (
+            <video
+              ref={videoPreviewRef}
+              muted
+              playsInline
+              controls={!videoRecording && videoPreviews.length > 0}
+            />
+            {!videoRecording && videoPreviews.length === 0 && (
               <div className="quick-capture-video-placeholder">
                 点击下方按钮，开始视频自白
               </div>
+            )}
+            {videoPreviews.length > 0 && (
+              <span
+                className="quick-capture-remove"
+                onClick={removeVideoFile}
+              >
+                ×
+              </span>
             )}
           </div>
           <button
@@ -723,22 +752,6 @@ const QuickCapture = () => {
           >
             {videoRecording ? "停止" : "开始录制"}
           </button>
-
-          {videoPreviews.length > 0 && (
-            <div className="quick-capture-video-list">
-              {videoPreviews.map((p, i) => (
-                <div key={`${p.name}-${i}`} className="quick-capture-video-item">
-                  <video src={p.url} muted playsInline controls />
-                  <span
-                    className="quick-capture-remove"
-                    onClick={() => removeVideoFile(i)}
-                  >
-                    ×
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
