@@ -51,6 +51,8 @@ const QuickCapture = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [inputMode, setInputMode] = useState("voice"); // "voice" | "text"
   const [recording, setRecording] = useState(false);
+  const [activeTab, setActiveTab] = useState("voice"); // "voice" | "video"
+  const [videoRecording, setVideoRecording] = useState(false);
 
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
@@ -63,6 +65,11 @@ const QuickCapture = () => {
   const streamRef = useRef(null);
   const audioCtxRef = useRef(null);
   const rafRef = useRef(null);
+  // 视频自白相关
+  const videoStreamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const videoChunksRef = useRef([]);
+  const videoPreviewRef = useRef(null);
 
   // iOS 检测：iOS 上 getUserMedia 与语音识别共用麦克风会冲突，
   // 因此 iOS 跳过真实采集，改用 CSS 假频谱动画
@@ -405,6 +412,97 @@ const QuickCapture = () => {
     }
   };
 
+  // —— 视频自白：MediaRecorder 页内录制 ——
+  const formatNow = () => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const cleanupVideoStream = () => {
+    if (videoStreamRef.current) {
+      videoStreamRef.current.getTracks().forEach((t) => t.stop());
+      videoStreamRef.current = null;
+    }
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null;
+    }
+  };
+
+  const startVideoRecording = async () => {
+    if (typeof window === "undefined" || typeof MediaRecorder === "undefined") {
+      message.warning("当前浏览器不支持录制视频");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: true,
+      });
+      videoStreamRef.current = stream;
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+        videoPreviewRef.current.play().catch(() => {});
+      }
+      // 按支持度挑选 mimeType，找不到用默认
+      const mimeTypes = ["video/mp4", "video/webm;codecs=vp9,opus", "video/webm"];
+      const mimeType = mimeTypes.find((t) => MediaRecorder.isTypeSupported(t)) || "";
+      let recorder;
+      try {
+        recorder = mimeType
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+      } catch (e) {
+        recorder = new MediaRecorder(stream);
+      }
+      videoChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) videoChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const type = mimeType || "video/webm";
+        const ext = type.includes("mp4") ? "mp4" : "webm";
+        const blob = new Blob(videoChunksRef.current, { type });
+        const file = new File([blob], `video_${Date.now()}.${ext}`, { type });
+        addFiles([file]);
+        // 时间戳写入 content（追加，不覆盖已有文字；textarea 可编辑）
+        setContent((prev) => (prev ? `${prev}\n${formatNow()}` : formatNow()));
+        message.success("视频已录入");
+        cleanupVideoStream();
+        videoChunksRef.current = [];
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setVideoRecording(true);
+    } catch (e) {
+      console.warn("视频录制不可用:", e);
+      message.error("请允许摄像头和麦克风权限");
+    }
+  };
+
+  const stopVideoRecording = () => {
+    setVideoRecording(false);
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      try {
+        recorder.stop();
+      } catch (e) {
+        console.warn("停止录制失败:", e);
+        cleanupVideoStream();
+      }
+    } else {
+      cleanupVideoStream();
+    }
+  };
+
+  const toggleVideoRecording = () => {
+    if (videoRecording) {
+      stopVideoRecording();
+    } else {
+      startVideoRecording();
+    }
+  };
+
   useEffect(() => {
     previewsRef.current = previews;
   }, [previews]);
@@ -423,11 +521,48 @@ const QuickCapture = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 组件卸载：清理视频自白（停止录制器 + 释放流）
+  useEffect(() => {
+    return () => {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
+        try {
+          mediaRecorderRef.current.stop();
+        } catch (e) {
+          // 忽略停止异常
+        }
+      }
+      if (videoStreamRef.current) {
+        videoStreamRef.current.getTracks().forEach((t) => t.stop());
+        videoStreamRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="quick-capture">
-      <h1 className="quick-capture-title">记下此刻</h1>
+      <div className="quick-capture-tabs">
+        <button
+          className={`quick-capture-tab${activeTab === "voice" ? " is-active" : ""}`}
+          onClick={() => setActiveTab("voice")}
+        >
+          VOICE
+        </button>
+        <button
+          className={`quick-capture-tab${activeTab === "video" ? " is-active" : ""}`}
+          onClick={() => setActiveTab("video")}
+        >
+          VIDEO
+        </button>
+      </div>
 
-      <div className="quick-capture-actions">
+      {activeTab === "voice" ? (
+        <>
+          <h1 className="quick-capture-title">记下此刻</h1>
+
+          <div className="quick-capture-actions">
         <Button icon={<CameraOutlined />} disabled={aiLoading} onClick={() => cameraInputRef.current?.click()}>
           拍照
         </Button>
@@ -529,10 +664,35 @@ const QuickCapture = () => {
         {inputMode === "voice" ? "切换到文本输入" : "切换到语音输入"}
       </button>
 
-      {(content.trim() || files.length > 0) && (
-        <button className="quick-capture-clear" onClick={handleClear}>
-          清空
-        </button>
+          {(content.trim() || files.length > 0) && (
+            <button className="quick-capture-clear" onClick={handleClear}>
+              清空
+            </button>
+          )}
+        </>
+      ) : (
+        <div className="quick-capture-video">
+          <div className="quick-capture-video-preview">
+            <video ref={videoPreviewRef} muted playsInline />
+            {!videoRecording && (
+              <div className="quick-capture-video-placeholder">
+                点击下方按钮，开始视频自白
+              </div>
+            )}
+          </div>
+          <button
+            className={`quick-capture-video-record${videoRecording ? " is-recording" : ""}`}
+            onClick={toggleVideoRecording}
+          >
+            {videoRecording ? "停止" : "开始录制"}
+          </button>
+          <textarea
+            className="quick-capture-video-note"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="记录此刻的心里话（录制完成会自动填入时间戳，可编辑）"
+          />
+        </div>
       )}
 
       <div className="quick-capture-footer">
