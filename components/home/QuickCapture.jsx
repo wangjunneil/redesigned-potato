@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { CameraOutlined, PictureOutlined, AudioOutlined } from "@ant-design/icons";
-import { Button, message } from "antd";
+import { Button, message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { amapGet } from "@/lib/amap";
@@ -56,6 +56,7 @@ const QuickCapture = () => {
   const [videoFiles, setVideoFiles] = useState([]); // VIDEO tab 独立状态
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [videoTimestamp, setVideoTimestamp] = useState(""); // 录制完成时间戳
+  const [mounted, setMounted] = useState(false); // 首帧渲染骨架屏，挂载后切到真实内容
 
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
@@ -135,6 +136,10 @@ const QuickCapture = () => {
         }
       );
     });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -596,6 +601,7 @@ const QuickCapture = () => {
 
   return (
     <div className="quick-capture">
+      <Skeleton active loading={!mounted}>
       <h1 className="quick-capture-title">记下此刻</h1>
 
       <div className="quick-capture-tabs">
@@ -777,6 +783,7 @@ const QuickCapture = () => {
           进入 timeline
         </Button>
       </div>
+      </Skeleton>
     </div>
   );
 };
