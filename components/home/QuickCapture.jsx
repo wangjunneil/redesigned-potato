@@ -53,6 +53,9 @@ const QuickCapture = () => {
   const [recording, setRecording] = useState(false);
   const [activeTab, setActiveTab] = useState("voice"); // "voice" | "video"
   const [videoRecording, setVideoRecording] = useState(false);
+  const [videoFiles, setVideoFiles] = useState([]); // VIDEO tab 独立状态
+  const [videoPreviews, setVideoPreviews] = useState([]);
+  const [videoTimestamp, setVideoTimestamp] = useState(""); // 录制完成时间戳
 
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
@@ -334,10 +337,18 @@ const QuickCapture = () => {
   };
 
   const handleSave = async () => {
-    if (!content.trim()) {
-      message.warning("请输入内容");
+    // 按当前 tab 分支：VOICE 用 content/files，VIDEO 用时间戳/videoFiles
+    if (activeTab === "voice") {
+      if (!content.trim()) {
+        message.warning("请输入内容");
+        return;
+      }
+    } else if (videoFiles.length === 0) {
+      message.warning("请先录制视频");
       return;
     }
+    const payloadContent = activeTab === "voice" ? content : videoTimestamp;
+    const payloadFiles = activeTab === "voice" ? files : videoFiles;
     setSaving(true);
     let finalGeo = geo;
     let finalWeather = weather;
@@ -348,15 +359,23 @@ const QuickCapture = () => {
         if (Object.keys(g).length) finalGeo = g;
         if (Object.keys(w).length) finalWeather = w;
       }
-      await submitTimeline({ content, files, geo: finalGeo, weather: finalWeather });
+      await submitTimeline({ content: payloadContent, files: payloadFiles, geo: finalGeo, weather: finalWeather });
       message.success("保存成功");
-      setContent("");
-      setFiles([]);
-      previews.forEach((p) => URL.revokeObjectURL(p.url));
-      setPreviews([]);
+      // 只清当前 tab 的状态
+      if (activeTab === "voice") {
+        setContent("");
+        setFiles([]);
+        previews.forEach((p) => URL.revokeObjectURL(p.url));
+        setPreviews([]);
+      } else {
+        videoPreviews.forEach((p) => URL.revokeObjectURL(p.url));
+        setVideoFiles([]);
+        setVideoPreviews([]);
+        setVideoTimestamp("");
+      }
     } catch (e) {
       try {
-        await saveDraft({ content, files, geo: finalGeo, weather: finalWeather });
+        await saveDraft({ content: payloadContent, files: payloadFiles, geo: finalGeo, weather: finalWeather });
         if (e.message === "UNAUTHORIZED") {
           message.info("请先点底部「进入 timeline」完成验证，内容已暂存");
         } else {
@@ -419,6 +438,24 @@ const QuickCapture = () => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
+  // 视频只进 VIDEO tab 的独立状态
+  const addVideoFile = (file) => {
+    setVideoFiles((prev) => [...prev, file]);
+    setVideoPreviews((prev) => [
+      ...prev,
+      { name: file.name, url: URL.createObjectURL(file), isVideo: true },
+    ]);
+  };
+
+  const removeVideoFile = (index) => {
+    setVideoFiles((prev) => prev.filter((_, i) => i !== index));
+    setVideoPreviews((prev) => {
+      const target = prev[index];
+      if (target?.url) URL.revokeObjectURL(target.url);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   const cleanupVideoStream = () => {
     if (videoStreamRef.current) {
       videoStreamRef.current.getTracks().forEach((t) => t.stop());
@@ -464,9 +501,9 @@ const QuickCapture = () => {
         const ext = type.includes("mp4") ? "mp4" : "webm";
         const blob = new Blob(videoChunksRef.current, { type });
         const file = new File([blob], `video_${Date.now()}.${ext}`, { type });
-        addFiles([file]);
-        // 时间戳写入 content（追加，不覆盖已有文字；textarea 可编辑）
-        setContent((prev) => (prev ? `${prev}\n${formatNow()}` : formatNow()));
+        addVideoFile(file);
+        // 记录录制完成时间戳，保存时作为 VIDEO tab 的 content
+        setVideoTimestamp(formatNow());
         message.success("视频已录入");
         cleanupVideoStream();
         videoChunksRef.current = [];
@@ -543,6 +580,8 @@ const QuickCapture = () => {
 
   return (
     <div className="quick-capture">
+      <h1 className="quick-capture-title">记下此刻</h1>
+
       <div className="quick-capture-tabs">
         <button
           className={`quick-capture-tab${activeTab === "voice" ? " is-active" : ""}`}
@@ -560,8 +599,6 @@ const QuickCapture = () => {
 
       {activeTab === "voice" ? (
         <>
-          <h1 className="quick-capture-title">记下此刻</h1>
-
           <div className="quick-capture-actions">
         <Button icon={<CameraOutlined />} disabled={aiLoading} onClick={() => cameraInputRef.current?.click()}>
           拍照
@@ -686,21 +723,33 @@ const QuickCapture = () => {
           >
             {videoRecording ? "停止" : "开始录制"}
           </button>
-          <textarea
-            className="quick-capture-video-note"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="记录此刻的心里话（录制完成会自动填入时间戳，可编辑）"
-          />
+
+          {videoPreviews.length > 0 && (
+            <div className="quick-capture-video-list">
+              {videoPreviews.map((p, i) => (
+                <div key={`${p.name}-${i}`} className="quick-capture-video-item">
+                  <video src={p.url} muted playsInline controls />
+                  <span
+                    className="quick-capture-remove"
+                    onClick={() => removeVideoFile(i)}
+                  >
+                    ×
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       <div className="quick-capture-footer">
         <div className="quick-capture-save-row">
-          <Button className="quick-capture-refine" disabled={aiLoading || saving} onClick={handleRefine}>
-            AI
-            {aiLoading && <span className="quick-capture-progress" />}
-          </Button>
+          {activeTab === "voice" && (
+            <Button className="quick-capture-refine" disabled={aiLoading || saving} onClick={handleRefine}>
+              AI
+              {aiLoading && <span className="quick-capture-progress" />}
+            </Button>
+          )}
           <Button
             type="primary"
             className="quick-capture-save"
